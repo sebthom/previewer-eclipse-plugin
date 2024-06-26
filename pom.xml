@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   SPDX-FileCopyrightText: © Sebastian Thomschke and contributors.
+   SPDX-FileContributor: Sebastian Thomschke
+   SPDX-License-Identifier: EPL-2.0
+   SPDX-ArtifactOfProjectHomePage:  https://github.com/sebthom/previewer-eclipse-plugin
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>com.vegardit.maven</groupId>
+      <artifactId>vegardit-maven-parent</artifactId>
+      <version>3.1.5</version>
+   </parent>
+
+   <groupId>de.sebthom.eclipse.previewer</groupId>
+   <artifactId>de.sebthom.eclipse.previewer.parent</artifactId>
+   <version>1.0.0-SNAPSHOT</version>
+   <packaging>pom</packaging>
+
+   <name>previewer-eclipse</name>
+   <url> https://github.com/sebthom/previewer-eclipse-plugin</url>
+   <inceptionYear>2021</inceptionYear>
+   <organization>
+      <!-- used as Specification/Implementation-Vendor in MANIFEST.MF -->
+      <name>Sebastian Thomschke</name>
+      <url>https://github.com/sebthom</url>
+   </organization>
+   <licenses>
+      <license>
+         <name>Eclipse Public License 2.0</name>
+         <distribution>repo</distribution>
+         <url>https://spdx.org/licenses/EPL-2.0</url>
+      </license>
+   </licenses>
+
+
+   <modules>
+      <module>plugin</module>
+      <module>plugin-graphviz</module>
+      <module>plugin-markdown</module>
+      <module>plugin-mermaid</module>
+      <module>feature</module>
+      <module>updatesite</module>
+   </modules>
+
+
+   <scm>
+      <!-- https://maven.apache.org/scm/git.html -->
+      <url> https://github.com/sebthom/previewer-eclipse-plugin</url>
+      <connection>scm:git: https://github.com/sebthom/previewer-eclipse-plugin.git</connection>
+      <developerConnection>scm:git: https://github.com/sebthom/previewer-eclipse-plugin.git</developerConnection>
+      <tag>HEAD</tag>
+   </scm>
+
+
+   <issueManagement>
+      <system>github.com</system>
+      <url> https://github.com/sebthom/previewer-eclipse-plugin/issues</url>
+   </issueManagement>
+
+
+   <ciManagement>
+      <system>github.com</system>
+      <url> https://github.com/sebthom/previewer-eclipse-plugin/actions</url>
+   </ciManagement>
+
+
+   <properties>
+      <java.version>17</java.version>
+      <tycho.version>4.0.8</tycho.version>
+
+      <!-- to prevent dozen of warnings like:
+      [WARNING] System artifact: p2.eclipse-plugin:org.eclipse.mylyn.commons.notifications.ui:jar:1.17.2.v20200813-0821:system has no file attached
+
+      Try downloading the file manually from the project website.
+      -->
+      <skip.enforcer.ban-duplicate-classes>true</skip.enforcer.ban-duplicate-classes>
+      <skip.enforcer.enforce-bytecode-version>true</skip.enforcer.enforce-bytecode-version>
+   </properties>
+
+
+   <dependencies>
+      <dependency>
+         <groupId>com.vegardit.no-npe</groupId>
+         <artifactId>no-npe-eea-all</artifactId>
+         <version>[1.0.0,)</version>
+         <scope>provided</scope>
+      </dependency>
+   </dependencies>
+   <repositories>
+      <repository>
+         <id>no-npe-snapshots</id>
+         <url>https://raw.githubusercontent.com/vegardit/no-npe/mvn-snapshots-repo/</url>
+         <releases><enabled>false</enabled></releases>
+         <snapshots><enabled>true</enabled></snapshots>
+      </repository>
+   </repositories>
+
+
+   <build>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <artifactId>maven-deploy-plugin</artifactId>
+               <configuration>
+                  <skip>true</skip>
+               </configuration>
+            </plugin>
+
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-bnd-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <!-- https://tycho.eclipseprojects.io/doc/latest/tycho-compiler-plugin/plugin-info.html -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-compiler-plugin</artifactId>
+               <version>${tycho.version}</version>
+               <configuration>
+                  <optimize>true</optimize>
+                  <compilerArgs>
+                     <arg>-annotationpath</arg>
+                     <arg>CLASSPATH</arg> <!-- read Eclipse External null Annotations from JARs on the classpath -->
+                  </compilerArgs>
+
+                  <!-- respect settings in .settings/org.eclipse.jdt.core.prefs -->
+                  <useProjectSettings>true</useProjectSettings>
+               </configuration>
+            </plugin>
+            <plugin>
+               <!-- https://github.com/eclipse-tycho/tycho/blob/master/RELEASE_NOTES.md#support-for-pde-declarative-component-annotation-processing -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-ds-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <!-- https://tycho.eclipseprojects.io/doc/latest/tycho-packaging-plugin/plugin-info.html -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-packaging-plugin</artifactId>
+               <version>${tycho.version}</version>
+               <configuration>
+                  <format>yyyyMMdd-HHmm</format>
+                  <!-- replace SNAPSHOT version in the final product configuration -->
+                  <finalName>${project.artifactId}_${unqualifiedVersion}.${buildQualifier}</finalName>
+               </configuration>
+            </plugin>
+            <plugin>
+               <!-- https://tycho.eclipseprojects.io/doc/latest/tycho-p2-plugin/plugin-info.html -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <!-- https://tycho.eclipseprojects.io/doc/latest/tycho-surefire-plugin/plugin-info.html -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-surefire-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <!--
+                 https://tycho.eclipseprojects.io/doc/latest/tycho-versions-plugin/plugin-info.html
+                 mvn -Dtycho.mode=maven tycho-versions:update-eclipse-metadata
+               -->
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-versions-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-director-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-publisher-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+            <plugin>
+               <groupId>org.eclipse.tycho</groupId>
+               <artifactId>tycho-p2-repository-plugin</artifactId>
+               <version>${tycho.version}</version>
+            </plugin>
+
+            <!-- The following plugins are ignored in the m2e lifecycle mapping -->
+            <plugin>
+               <groupId>org.eclipse.m2e</groupId>
+               <artifactId>lifecycle-mapping</artifactId>
+               <version>1.0.0</version>
+               <configuration>
+                  <lifecycleMappingMetadata>
+                     <pluginExecutions>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>org.apache.maven.plugins</groupId>
+                              <artifactId>maven-clean-plugin</artifactId>
+                              <versionRange>[1.0,)</versionRange>
+                              <goals>
+                                 <goal>clean</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>org.eclipse.tycho</groupId>
+                              <artifactId>tycho-packaging-plugin</artifactId>
+                              <versionRange>[1.0,)</versionRange>
+                              <goals>
+                                 <goal>build-qualifier-aggregator</goal>
+                                 <goal>validate-id</goal>
+                                 <goal>validate-version</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>org.eclipse.tycho</groupId>
+                              <artifactId>tycho-compiler-plugin</artifactId>
+                              <versionRange>[1.0,)</versionRange>
+                              <goals>
+                                 <goal>compile</goal>
+                                 <goal>testCompile</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                        <pluginExecution>
+                           <pluginExecutionFilter>
+                              <groupId>org.eclipse.tycho</groupId>
+                              <artifactId>target-platform-configuration</artifactId>
+                              <versionRange>[1.0,)</versionRange>
+                              <goals>
+                                 <goal>target-platform</goal>
+                              </goals>
+                           </pluginExecutionFilter>
+                           <action>
+                              <ignore />
+                           </action>
+                        </pluginExecution>
+                     </pluginExecutions>
+                  </lifecycleMappingMetadata>
+               </configuration>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+
+      <plugins>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-maven-plugin</artifactId>
+            <version>${tycho.version}</version>
+            <extensions>true</extensions>
+         </plugin>
+         <plugin>
+            <!-- https://tycho.eclipseprojects.io/doc/latest/target-platform-configuration/target-platform-mojo.html -->
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>target-platform-configuration</artifactId>
+            <version>${tycho.version}</version>
+            <configuration>
+               <pomDependencies>ignore</pomDependencies>
+
+               <executionEnvironment>JavaSE-${java.version}</executionEnvironment>
+
+               <target>
+                  <file>../build.target</file>
+               </target>
+               <environments>
+                  <environment>
+                     <os>linux</os>
+                     <ws>gtk</ws>
+                     <arch>x86_64</arch>
+                  </environment>
+                  <environment>
+                     <os>macosx</os>
+                     <ws>cocoa</ws>
+                     <arch>x86_64</arch>
+                  </environment>
+                  <environment>
+                     <os>win32</os>
+                     <ws>win32</ws>
+                     <arch>x86_64</arch>
+                  </environment>
+               </environments>
+            </configuration>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-source-plugin</artifactId>
+            <version>${tycho.version}</version>
+            <executions>
+               <execution>
+                  <id>attach-source</id>
+                  <goals>
+                     <goal>plugin-source</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+   </build>
+
+   <profiles>
+      <profile>
+         <id>disable-tycho-packaging-plugin-if-executed-in-eclipse</id>
+         <activation>
+            <property>
+               <name>eclipse.application</name>
+            </property>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <!-- disable building of a new jar on each file change from within Eclipse -->
+                  <groupId>org.eclipse.tycho</groupId>
+                  <artifactId>tycho-packaging-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <id>default-package-plugin</id>
+                        <phase>none</phase>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
+</project>

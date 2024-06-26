@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+   SPDX-FileCopyrightText: © Sebastian Thomschke and contributors.
+   SPDX-FileContributor: Sebastian Thomschke
+   SPDX-License-Identifier: EPL-2.0
+   SPDX-ArtifactOfProjectHomePage:  https://github.com/sebthom/previewer-eclipse-plugin
+-->
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+   <modelVersion>4.0.0</modelVersion>
+
+   <parent>
+      <groupId>de.sebthom.eclipse.previewer</groupId>
+      <artifactId>de.sebthom.eclipse.previewer.parent</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+   </parent>
+
+   <name>previewer-eclipse-feature</name>
+   <artifactId>de.sebthom.eclipse.previewer.feature</artifactId>
+   <packaging>eclipse-feature</packaging>
+</project>

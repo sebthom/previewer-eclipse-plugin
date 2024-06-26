@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension-point id="renderers" name="Preview Renderers" schema="schema/renderers.exsd" />
+
+   <!-- ===================================== -->
+   <!-- View                                  -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.views">
+      <category name="%PluginName" id="de.sebthom.eclipse.previewer.category" />
+      <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
+         class="de.sebthom.eclipse.previewer.ui.PreviewView"
+         name="%ViewName"
+         icon="src/main/resources/images/logo.png"
+         category="de.sebthom.eclipse.previewer.category" />
+   </extension>
+
+   <extension point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
+            ratio="0.3"
+            relative="org.eclipse.ui.views.ProblemView"
+            relationship="bottom" />
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
+            ratio="0.3"
+            relative="org.eclipse.ui.views.ProblemView"
+            relationship="bottom" />
+      </perspectiveExtension>
+      <perspectiveExtension targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
+         <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
+            ratio="0.3"
+            relative="org.eclipse.ui.views.ProblemView"
+            relationship="bottom" />
+      </perspectiveExtension>
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- View - Toolbar - Refresh              -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.RefreshPreview"
+            icon="src/main/resources/images/refresh.png" style="push" />
+      </menuContribution>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <command id="de.sebthom.eclipse.previewer.command.RefreshPreview"
+         defaultHandler="de.sebthom.eclipse.previewer.command.RefreshPreview"
+         name="Refresh">
+      </command>
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- View - Toolbar - Live Preview         -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.ToggleLivePreview"
+            icon="src/main/resources/images/live_preview.png" style="toggle" />
+      </menuContribution>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <command id="de.sebthom.eclipse.previewer.command.ToggleLivePreview"
+         defaultHandler="de.sebthom.eclipse.previewer.command.ToggleLivePreview"
+         name="Live Preview">
+         <state id="org.eclipse.ui.commands.toggleState"
+            class="org.eclipse.ui.handlers.RegistryToggleState:true" />
+      </command>
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- View - Toolbar - Link To Editor       -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
+            icon="src/main/resources/images/link_to_editor.png" style="toggle" />
+      </menuContribution>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <command id="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
+         defaultHandler="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
+         name="Link with Editor">
+         <state id="org.eclipse.ui.commands.toggleState"
+            class="org.eclipse.ui.handlers.RegistryToggleState:true" />
+      </command>
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- View - Toolbar - Open Preferences     -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.OpenPreferences"
+            icon="src/main/resources/images/settings.png" style="push" />
+      </menuContribution>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <command id="de.sebthom.eclipse.previewer.command.OpenPreferences"
+         defaultHandler="de.sebthom.eclipse.previewer.command.OpenPreferences"
+         name="Open Preferences" />
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- Preferences                           -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="de.sebthom.eclipse.previewer.prefs.PluginPreferences$Initializer" />
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages">
+      <page id="de.sebthom.eclipse.previewer.prefs.PluginPreferencePage"
+         name="%PluginName"
+         class="de.sebthom.eclipse.previewer.prefs.PluginPreferencePage" />
+   </extension>
+
+
+   <!-- ===================================== -->
+   <!-- Renderers                             -->
+   <!-- ===================================== -->
+   <extension point="de.sebthom.eclipse.previewer.renderers">
+      <previewRenderer class="de.sebthom.eclipse.previewer.renderer.html.ExtensibleHtmlPreviewRenderer" file-patterns="**/*" />
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.SvgPreviewRenderer" file-extensions="svg">
+         <content-type id="text.xml.svg" />
+      </htmlPreviewRenderer>
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.HtmlFilePreviewRenderer" file-extensions="htm,html">
+         <content-type id="text.html.basic" />
+      </htmlPreviewRenderer>
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.XmlPreviewRenderer" file-extensions="xml">
+         <content-type id="text.xml" />
+      </htmlPreviewRenderer>
+   </extension>
+
+</plugin>

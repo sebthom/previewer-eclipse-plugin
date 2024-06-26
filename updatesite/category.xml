@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="de.sebthom.eclipse.previewer.feature"/>
+   <repository-reference location="https://raw.githubusercontent.com/sebthom/eclipse-commons/updatesite" name="" enabled="true" />
+</site>

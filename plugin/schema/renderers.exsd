@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="de.sebthom.eclipse.previewer" xmlns="http://www.w3.org/2001/XMLSchema">
+<annotation>
+      <appinfo>
+         <meta.schema plugin="de.sebthom.eclipse.previewer" id="de.sebthom.eclipse.previewer" name="Preview Renderer"/>
+      </appinfo>
+      <documentation>
+         Extension point to register preview renderers.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
+      <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="previewRenderer"/>
+            <element ref="htmlPreviewRenderer"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="previewRenderer">
+      <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="content-type"/>
+         </sequence>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":de.sebthom.eclipse.previewer.api.PreviewRenderer"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="file-extensions" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file extensions for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="file-names" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file names for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="file-patterns" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file path patterns for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="htmlPreviewRenderer">
+      <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="content-type"/>
+         </sequence>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="file-extensions" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file extensions for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="file-names" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file names for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="file-patterns" type="string">
+            <annotation>
+               <documentation>
+                  a comma-separated list of file path patterns for files supported by this renderer
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="content-type">
+      <annotation>
+         <documentation>
+            Content-type of files supported by this renderer
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="since"/>
+      </appinfo>
+      <documentation>
+         1.0
+      </documentation>
+   </annotation>
+
+
+
+   <annotation>
+      <appinfo>
+         <meta.section type="implementation"/>
+      </appinfo>
+      <documentation>
+         This plugin itself does not have any predefined renderers
+      </documentation>
+   </annotation>
+
+
+</schema>

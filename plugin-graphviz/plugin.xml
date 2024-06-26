@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <!-- ===================================== -->
+   <!-- Preferences                           -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.core.runtime.preferences">
+      <initializer class="de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferences$Initializer" />
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages">
+      <page id="de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferencePage"
+         name="%PreferencePageName"
+         class="de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferencePage" category="de.sebthom.eclipse.previewer.prefs.PluginPreferencePage" />
+   </extension>
+
+   <!-- ===================================== -->
+   <!-- Renderers                             -->
+   <!-- ===================================== -->
+   <extension point="de.sebthom.eclipse.previewer.renderers">
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.graphviz.GraphvizHtmlPreviewRenderer" file-extensions="dot" />
+   </extension>
+
+</plugin>

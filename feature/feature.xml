@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   SPDX-FileCopyrightText: © Sebastian Thomschke and contributors.
+   SPDX-FileContributor: Sebastian Thomschke
+   SPDX-License-Identifier: EPL-2.0
+   SPDX-ArtifactOfProjectHomePage:  https://github.com/sebthom/previewer-eclipse-plugin
+-->
+<feature
+      id="de.sebthom.eclipse.previewer.feature"
+      label="%name"
+      version="1.0.0.qualifier"
+      provider-name="Sebastian Thomschke"
+      plugin="de.sebthom.eclipse.previewer"
+      license-feature="org.eclipse.license"
+      license-feature-version="2.0.2.qualifier">
+
+   <description url="https://github.com/sebthom/previewer-eclipse-plugin">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="Previewer - Latest" url="https://raw.githubusercontent.com/sebthom/previewer-eclipse-plugin/updatesite/"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.platform" version="4.25.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.apache.commons.lang3" version="3.12.0" match="greaterOrEqual"/>
+      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.20240625-1932" match="greaterOrEqual"/>
+      <import plugin="net.sf.jstuff.core" version="7.12.0" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="de.sebthom.eclipse.previewer"
+         version="0.0.0"/>
+
+   <plugin
+         id="de.sebthom.eclipse.previewer.graphviz"
+         version="0.0.0"/>
+
+   <plugin
+         id="de.sebthom.eclipse.previewer.markdown"
+         version="0.0.0"/>
+
+   <plugin
+         id="de.sebthom.eclipse.previewer.mermaid"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.apache.commons.lang3"
+         version="0.0.0"/>
+
+   <plugin
+         id="net.sf.jstuff.core"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.autolink"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-autolink"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-gfm-strikethrough"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-gfm-tables"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-task-list-items"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.apache.commons.commons-io"
+         version="0.0.0"/>
+
+</feature>
