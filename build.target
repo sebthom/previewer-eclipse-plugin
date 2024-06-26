@@ -31,9 +31,27 @@
                <groupId>net.sf.jstuff</groupId>
                <artifactId>jstuff-core</artifactId>
                <version>7.12.0</version>
-               <type>jar</type>
             </dependency>
          </dependencies>
+      </location>
+
+      <location includeDependencyDepth="direct" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
+         <dependencies>
+            <dependency>
+               <groupId>net.sourceforge.plantuml</groupId>
+               <artifactId>plantuml-mit</artifactId>
+               <version>1.2024.5</version>
+            </dependency>
+         </dependencies>
+         <instructions><![CDATA[
+Bundle-Name:           Bundle derived from maven artifact ${mvnGroupId}:${mvnArtifactId}:${mvnVersion}
+version:               ${version_cleanup;${mvnVersion}}
+Bundle-SymbolicName:   ${mvnGroupId}.${mvnArtifactId}
+Bundle-Version:        ${version}
+Import-Package:        *;resolution:=optional
+Export-Package:        *;version="${version}";-noimport:=true
+DynamicImport-Package: *
+]]></instructions>
       </location>
 
       <location includeDependencyDepth="direct" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">

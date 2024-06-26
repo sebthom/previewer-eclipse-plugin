@@ -25,6 +25,7 @@ The following formats are supported out of the box:
 - GraphViz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
 - [Mermaid](https://mermaid.js.org/) diagrams
+- [PlantUML](https://plantuml.com/) diagrams
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
 
 This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
@@ -61,7 +62,7 @@ If you are new to Eclipse plugin development please consult https://github.com/e
 for more details about extension points.
 
 1. The `htmlPreviewerRenderer` extension point allows to register classes implementing [de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer](plugin/src/main/java/de/sebthom/eclipse/previewer/api/HtmlPreviewRenderer.java):
-   HtmlPreviewRenderer are used to render source files to a HTML representation. The renderer plugin display the generated HTML inside managed browser component. 
+   HtmlPreviewRenderer are used to render source files to a HTML representation. The renderer plugin display the generated HTML inside managed browser component.
    ```xml
    <extension point="de.sebthom.eclipse.previewer.renderers">
       <htmlPreviewRenderer class="com.example.ConfigHtmlPreviewRenderer" file-extensions="cfg,ini" file-pattern="**/.cfg/_config_rc" file-names="CONFIG_RC" />
@@ -131,6 +132,8 @@ By default, Markdown files are rendered using a bundled version of [CommonMark J
 Rendered Markdown files are styled using [GitHub MarkDown CSS](https://github.com/sindresorhus/github-markdown-css/), which is licensed under [MIT](https://github.com/sindresorhus/github-markdown-css/blob/main/license).
 
 Mermaid files are rendered using a bundled version of [Mermaid JS](https://github.com/mermaid-js/mermaid), which is licensed under [MIT](https://github.com/mermaid-js/mermaid/blob/develop/LICENSE).
+
+PlantUML files are rendered using a bundled version of [PlantUML](https://github.com/plantuml/plantuml/), which is licensed under [MIT](https://github.com/plantuml/plantuml/blob/master/plantuml-mit/mit-license.txt)
 
 
 ## <a name="license"></a>License

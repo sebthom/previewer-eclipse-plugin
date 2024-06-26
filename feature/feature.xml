@@ -59,6 +59,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="de.sebthom.eclipse.previewer.plantuml"
+         version="0.0.0"/>
+
+   <plugin
          id="org.apache.commons.lang3"
          version="0.0.0"/>
 
@@ -92,6 +96,10 @@
 
    <plugin
          id="org.apache.commons.commons-io"
+         version="0.0.0"/>
+
+   <plugin
+         id="net.sourceforge.plantuml.plantuml-mit"
          version="0.0.0"/>
 
 </feature>

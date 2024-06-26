@@ -4,13 +4,12 @@
  * SPDX-License-Identifier: EPL-2.0
  * SPDX-ArtifactOfProjectHomePage: https://github.com/sebthom/previewer-eclipse-plugin
  */
-package de.sebthom.eclipse.previewer.graphviz.prefs;
+package de.sebthom.eclipse.previewer.plantuml.prefs;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
@@ -29,19 +28,20 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
    protected void createFieldEditors() {
       final var parent = getFieldEditorParent();
 
-      final var rendererCombo = new ComboFieldEditor(PluginPreferences.PREF_GRAPHVIZ_RENDERER, "Graphviz Renderer:", new String[][] { //
-         {"GraphViz dot (external)", "native"}, //
-         {"viz.js (built-in)", "embedded"} //
-      }, parent);
-      addField(rendererCombo);
+      final var layoutEngineCombo = new ComboFieldEditor(PluginPreferences.PREF_PLANTUML_LAYOUT_ENGINE, "PlantUML Layout Engine:",
+         new String[][] { //
+            {"GraphViz DOT (external)", "dot"}, //
+            {"Smetana (built-in)", "smetana"} //
+         }, parent);
+      addField(layoutEngineCombo);
 
-      addField(new GroupFieldEditor("External renderer", parent, group -> List.of( //
-         new FileFieldEditor(PluginPreferences.PREF_GRAPHVIZ_NATIVE_EXE, "GraphViz dot Executable", group) {
+      addField(new GroupFieldEditor("External layout engine", parent, group -> List.of( //
+         new FileFieldEditor(PluginPreferences.PREF_GRAPHVIZ_DOT_EXE, "GraphViz dot Executable", group) {
             @Override
             protected boolean checkState() {
-               final var renderer = rendererCombo.getPreferenceStore().getString(rendererCombo.getPreferenceName());
+               final var layoutEngine = layoutEngineCombo.getPreferenceStore().getString(layoutEngineCombo.getPreferenceName());
 
-               if (!"native".equals(renderer))
+               if (!"smetana".equals(layoutEngine))
                   return true;
 
                String msg = null;
@@ -68,10 +68,7 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
                clearErrorMessage();
                return true;
             }
-         }, //
-         new BooleanFieldEditor(PluginPreferences.PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_JAVA,
-            "Use embedded renderer when native renderer is unavailable", group)) //
-      ));
+         })));
    }
 
    public PluginPreferencePage() {

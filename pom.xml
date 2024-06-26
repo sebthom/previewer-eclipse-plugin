@@ -43,6 +43,7 @@
       <module>plugin-graphviz</module>
       <module>plugin-markdown</module>
       <module>plugin-mermaid</module>
+      <module>plugin-plantuml</module>
       <module>feature</module>
       <module>updatesite</module>
    </modules>
