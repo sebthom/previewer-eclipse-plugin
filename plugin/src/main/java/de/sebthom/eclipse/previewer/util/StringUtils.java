@@ -53,50 +53,50 @@ public final class StringUtils {
    public static String htmlInfoBox(final String htmlContent) {
       return """
 
-            <style>
-            #previewer_infobox {
-              position: fixed;
-              top: 2px;
-              right: 2px;
-              opacity: 0.8;
-              padding: 1px 4px 1px 4px;
-              background-color: #f9f9f9;
-              border: 1px solid #ccc;
-              box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-              border-radius: 3px;
-              font-size: 0.8em;
-              font-family: Tahoma, sans-serif;
-            }
-            #previewer_infobox.minimized {
-              width: 10px;
-            }
-            </style>
+         <style>
+         #previewer_infobox {
+           position: fixed;
+           top: 2px;
+           right: 2px;
+           opacity: 0.8;
+           padding: 1px 4px 1px 4px;
+           background-color: #f9f9f9;
+           border: 1px solid #ccc;
+           box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+           border-radius: 3px;
+           font-size: 0.8em;
+           font-family: Tahoma, sans-serif;
+         }
+         #previewer_infobox.minimized {
+           width: 10px;
+         }
+         </style>
 
-            <div id="previewer_infobox">
-              <button style="border:none; padding:0px; background:none;"
-                onmouseover="this.style.backgroundColor='#C0DCF3';"
-                onmouseout="this.style.background='transparent';"
-                onclick="previewer_infobox_toggle()">&#11166;</button>
-              <span>
-               """ + htmlContent + """
-              </span>
-            </div>
+         <div id="previewer_infobox">
+           <button style="border:none; padding:0px; background:none;"
+             onmouseover="this.style.backgroundColor='#C0DCF3';"
+             onmouseout="this.style.background='transparent';"
+             onclick="previewer_infobox_toggle()">&#11166;</button>
+           <span>
+            """ + htmlContent + """
+           </span>
+         </div>
 
-            <script>
-              function previewer_infobox_toggle() {
-                if(document.querySelector('#previewer_infobox').classList.contains("minimized")) {
-                  document.querySelector('#previewer_infobox').classList.remove('minimized');
-                  document.querySelector('#previewer_infobox > span').style.display = 'inline';
-                  document.querySelector('#previewer_infobox button').innerHTML = '&#11166;';
-                } else {
-                  document.querySelector('#previewer_infobox').classList.add('minimized');
-                  document.querySelector('#previewer_infobox > span').style.display = 'none';
-                  document.querySelector('#previewer_infobox button').innerHTML = '&#11164;';
-                }
-              }
-            </script>
+         <script>
+           function previewer_infobox_toggle() {
+             if(document.querySelector('#previewer_infobox').classList.contains("minimized")) {
+               document.querySelector('#previewer_infobox').classList.remove('minimized');
+               document.querySelector('#previewer_infobox > span').style.display = 'inline';
+               document.querySelector('#previewer_infobox button').innerHTML = '&#11166;';
+             } else {
+               document.querySelector('#previewer_infobox').classList.add('minimized');
+               document.querySelector('#previewer_infobox > span').style.display = 'none';
+               document.querySelector('#previewer_infobox button').innerHTML = '&#11164;';
+             }
+           }
+         </script>
 
-            """;
+         """;
    }
 
    public static void jsonEscape(final Reader input, final Appendable out) throws IOException {

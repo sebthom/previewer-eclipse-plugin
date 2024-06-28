@@ -11,8 +11,6 @@ import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.api.ContentSource;
@@ -20,6 +18,7 @@ import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.markdown.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.markdown.renderer.CommonMarkRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.GitHubMarkdownRenderer;
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 import net.sf.jstuff.core.graphic.RGB;
 
@@ -68,7 +67,6 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
                         : renderer.getClass().getSimpleName();
 
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-      final var now = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
       out.append("<!DOCTYPE html>");
       out.append("<html>");
@@ -78,7 +76,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append("</head>");
       out.append("<body class='markdown-body' style='padding:5px'>\n\n");
       out.append(htmlBody);
-      out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + now));
+      out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 

@@ -10,7 +10,6 @@ import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +28,7 @@ import de.sebthom.eclipse.previewer.cache.RenderCacheByLastModified;
 import de.sebthom.eclipse.previewer.cache.RenderCacheUsingSourceContentHash;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
 import de.sebthom.eclipse.previewer.ui.BrowserWrapper;
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 import net.sf.jstuff.core.exception.Exceptions;
 import net.sf.jstuff.core.functional.ThrowingFunction;
 
@@ -143,7 +143,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
    private void adjustHTML(final Path path, final StringBuilder html) {
       // add meta footer
-      html.append("<!-- " + path.toUri() + " @ " + LocalTime.now() + " -->");
+      html.append("<!-- " + path.toUri() + " @ " + MiscUtils.getCurrentTime() + " -->");
 
       // add <base> tag to be able to resolve relatively referenced images
       final var headEndPos = html.indexOf("</head>");

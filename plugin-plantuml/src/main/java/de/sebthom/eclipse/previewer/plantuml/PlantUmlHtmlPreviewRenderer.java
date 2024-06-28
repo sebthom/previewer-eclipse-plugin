@@ -11,12 +11,11 @@ import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.plantuml.prefs.PluginPreferences;
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 import net.sourceforge.plantuml.BlockUml;
 import net.sourceforge.plantuml.FileFormat;
@@ -40,7 +39,6 @@ public class PlantUmlHtmlPreviewRenderer implements HtmlPreviewRenderer {
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-      final var now = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
       final var reader = new SourceStringReader(source.contentAsString());
       final var baos = new ByteArrayOutputStream();
@@ -70,7 +68,7 @@ public class PlantUmlHtmlPreviewRenderer implements HtmlPreviewRenderer {
          }
       }
 
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + now));
+      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

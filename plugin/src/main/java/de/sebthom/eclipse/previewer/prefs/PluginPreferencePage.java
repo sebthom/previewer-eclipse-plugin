@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -30,6 +31,7 @@ import de.sebthom.eclipse.commons.ui.Tables;
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
 import net.sf.jstuff.core.Strings;
+import net.sf.jstuff.core.SystemUtils;
 
 /**
  * @author Sebastian Thomschke
@@ -171,6 +173,13 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
       addField(new TableFieldEditor(parent, input -> //
       Arrays.stream(Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS)) //
          .filter(ce -> "htmlPreviewRenderer".equals(ce.getName())).toArray()));
+      if (SystemUtils.IS_OS_WINDOWS) {
+         addField(new ComboFieldEditor(PluginPreferences.PREF_WINDOWS_WEBVIEW,
+            "Web View Implementation (changing may require app restart):", new String[][] { //
+               new String[] {"Microsoft Edge WebView2 (experimental, may freeze)", "edge"}, //
+               new String[] {"Microsoft Internet Explorer (stable, but does not support rendering Mermaid diagrams)", "default"} //
+            }, parent));
+      }
    }
 
    @Override

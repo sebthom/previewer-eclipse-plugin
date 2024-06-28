@@ -20,6 +20,7 @@ import org.eclipse.ui.services.IDisposable;
 
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Plugin;
+import de.sebthom.eclipse.previewer.prefs.PluginPreferences;
 import net.sf.jstuff.core.Strings;
 
 /**
@@ -32,7 +33,18 @@ public class BrowserWrapper implements IDisposable {
 
    public BrowserWrapper(final Composite parent) {
       // for SWT.EDGE, see https://github.com/eclipse-platform/eclipse.platform.swt/blob/master/bundles/org.eclipse.swt/Readme.WebView2.md#limitation-and-caveats
-      browser = new Browser(parent, SystemUtils.IS_OS_WINDOWS ? SWT.EDGE : SWT.NONE);
+      Browser browser;
+      if (SystemUtils.IS_OS_WINDOWS && "edge".equals(PluginPreferences.getWebView())) {
+         try {
+            browser = new Browser(parent, SWT.EDGE);
+         } catch (final SWTException ex) {
+            Plugin.log().error(ex);
+            browser = new Browser(parent, SWT.NONE);
+         }
+      } else {
+         browser = new Browser(parent, SWT.NONE);
+      }
+      this.browser = browser;
       browser.addProgressListener(new ProgressAdapter() {
          @Override
          public void completed(final ProgressEvent event) {

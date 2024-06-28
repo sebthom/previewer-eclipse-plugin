@@ -9,11 +9,10 @@ package de.sebthom.eclipse.previewer.renderer.html;
 import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 
 import java.io.IOException;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 import net.sf.jstuff.core.Strings;
 
@@ -29,7 +28,6 @@ public class SvgPreviewRenderer implements HtmlPreviewRenderer {
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-      final var now = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
 
       out.append("<!DOCTYPE html>");
       out.append("<html><body>");
@@ -42,7 +40,7 @@ public class SvgPreviewRenderer implements HtmlPreviewRenderer {
       //out.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 width height'>\n");
       out.append(Strings.substringBetween(source.contentAsString(), "<svg ", "</svg>"));
       out.append("</svg>");
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + now));
+      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }
