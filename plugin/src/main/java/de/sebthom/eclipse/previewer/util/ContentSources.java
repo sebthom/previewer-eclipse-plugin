@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.commons.io.input.CharSequenceInputStream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.content.IContentType;
@@ -27,7 +28,6 @@ import de.sebthom.eclipse.commons.text.ContentTypes;
 import de.sebthom.eclipse.commons.ui.Editors;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import net.sf.jstuff.core.Strings;
-import net.sf.jstuff.core.io.stream.CharSequenceInputStream;
 
 /**
  * @author Sebastian Thomschke
@@ -48,7 +48,7 @@ public final class ContentSources {
 
       @Override
       public InputStream contentAsInputStream() throws IOException {
-         return new CharSequenceInputStream(content);
+         return CharSequenceInputStream.builder().setCharSequence(content).get();
       }
 
       @Override
@@ -205,7 +205,7 @@ public final class ContentSources {
 
       @Override
       public InputStream contentAsInputStream() {
-         return new CharSequenceInputStream(contentAsString());
+         return CharSequenceInputStream.builder().setCharSequence(contentAsString()).get();
       }
 
       @Override

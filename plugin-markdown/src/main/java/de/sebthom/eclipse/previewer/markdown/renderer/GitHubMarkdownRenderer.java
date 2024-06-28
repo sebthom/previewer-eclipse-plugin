@@ -13,12 +13,13 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
 
+import org.apache.commons.io.input.CharSequenceInputStream;
+
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.markdown.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.markdown.util.GitUtils;
 import de.sebthom.eclipse.previewer.markdown.util.NetUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
-import net.sf.jstuff.core.io.stream.CharSequenceInputStream;
 
 /**
  * Uses the online <a href="https://docs.github.com/en/rest/markdown/markdown">GitHub API for Markdown</a> to render markdown
@@ -55,7 +56,7 @@ public final class GitHubMarkdownRenderer implements MarkdownRenderer {
             .header("Content-Type", "application/json") //
             .header("X-GitHub-Api-Version", "2022-11-28") //
             .timeout(Duration.ofSeconds(5)) //
-            .POST(BodyPublishers.ofInputStream(() -> new CharSequenceInputStream(jsonPayload)));
+            .POST(BodyPublishers.ofInputStream(() -> CharSequenceInputStream.builder().setCharSequence(jsonPayload).get()));
          if (!githubApiToken.isBlank()) {
             request.header("Authorization", "token " + githubApiToken);
          }
