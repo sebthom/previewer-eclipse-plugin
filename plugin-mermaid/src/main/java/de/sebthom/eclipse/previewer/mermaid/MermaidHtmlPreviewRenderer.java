@@ -17,6 +17,7 @@ import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
+import net.sf.jstuff.core.Strings;
 
 /**
  * @author Sebastian Thomschke
@@ -63,7 +64,7 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
       }
       out.append("""
          <pre class="mermaid" style="width:100%">
-         """ + source.contentAsString() + """
+         """ + Strings.replace(source.contentAsString(), "<", "&lt;") + """
          </pre>
          """);
       out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
