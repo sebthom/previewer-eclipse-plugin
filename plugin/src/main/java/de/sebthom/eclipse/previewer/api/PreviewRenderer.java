@@ -28,4 +28,11 @@ public interface PreviewRenderer extends IDisposable {
     * @return true if rendering of the given {@link ContentSource} is supported and rendering was performed.
     */
    boolean render(ContentSource source, boolean forceCacheUpdate) throws IOException;
+
+   float getZoom();
+
+   /**
+    * @param level 1.0f means no zoom
+    */
+   void setZoom(float level);
 }

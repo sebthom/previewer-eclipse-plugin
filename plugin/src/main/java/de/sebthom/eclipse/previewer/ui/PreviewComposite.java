@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.mutable.MutableFloat;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
@@ -333,4 +334,20 @@ public final class PreviewComposite extends Composite {
          }
       });
    }
+
+   @SuppressWarnings("all")
+   float getZoom() {
+      final var zoom = new MutableFloat(1);
+      renderers.entrySet().stream() //
+         .filter(e -> e.getValue() == stack.topControl) //
+         .findFirst().ifPresent(e -> zoom.setValue(e.getKey().renderer.getZoom()));
+      return zoom.getValue();
+   }
+
+   void setZoom(final float zoom) {
+      renderers.entrySet().stream() //
+         .filter(e -> e.getValue() == stack.topControl) //
+         .findFirst().ifPresent(e -> e.getKey().renderer.setZoom(zoom));
+   }
+
 }

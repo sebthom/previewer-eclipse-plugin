@@ -29,6 +29,8 @@ import de.sebthom.eclipse.previewer.cache.RenderCacheUsingSourceContentHash;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
 import de.sebthom.eclipse.previewer.ui.BrowserWrapper;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
+import net.sf.jstuff.core.collection.LRUMap;
+import net.sf.jstuff.core.collection.tuple.Tuple2;
 import net.sf.jstuff.core.exception.Exceptions;
 import net.sf.jstuff.core.functional.ThrowingFunction;
 
@@ -36,6 +38,14 @@ import net.sf.jstuff.core.functional.ThrowingFunction;
  * @author Sebastian Thomschke
  */
 public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
+
+   private static final class PageState {
+      Tuple2<Integer, Integer> scrollPos = Tuple2.create(0, 0);
+      float zoomLevel = 1.0f;
+   }
+
+   private LRUMap<String, PageState> pageStates = new LRUMap<>(500);
+   private @Nullable String currentPageStateKey;
 
    private final RenderCache renderCacheOfEditors = new RenderCacheUsingSourceContentHash("render_cache_editors");
    private final RenderCache renderCacheOfFiles = new RenderCacheByLastModified("render_cache_files");
@@ -80,6 +90,46 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    }
 
    @Override
+   public float getZoom() {
+      final var pageStateKey = currentPageStateKey;
+      if (pageStateKey == null)
+         return 1.0f;
+      final var pageState = pageStates.get(pageStateKey);
+      return pageState == null ? 1.0f : pageState.zoomLevel;
+   }
+
+   @Override
+   public synchronized void setZoom(final float level) {
+      final var pageStateKey = currentPageStateKey;
+      if (pageStateKey != null) {
+         final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
+         pageState.zoomLevel = level;
+         browser.setZoom(level);
+      }
+   }
+
+   private synchronized void navigateTo(final ContentSource source, final Path renderedContentPath) {
+      var pageStateKey = currentPageStateKey;
+      if (pageStateKey != null) {
+         final var pageState = pageStates.get(pageStateKey);
+         if (pageState != null) {
+            pageState.scrollPos = browser.getScrollPos();
+         }
+      }
+
+      pageStateKey = currentPageStateKey = source.path().toString();
+      final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
+      browser.navigateTo(renderedContentPath).thenRun(() -> {
+         if (pageState.zoomLevel != 1.0f) {
+            browser.setZoom(pageState.zoomLevel);
+         }
+         if (pageState.scrollPos.get1() > 0 || pageState.scrollPos.get2() > 0) {
+            browser.setScrollPos(pageState.scrollPos);
+         }
+      });
+   }
+
+   @Override
    public boolean render(final ContentSource source, final boolean forceCacheUpdate) throws IOException {
       final var path = source.path();
 
@@ -113,18 +163,18 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
             : renderCache.computeIfAbsent(source, cacheFunction, "html");
 
       if (renderedContentPath != null) {
-         browser.navigateTo(renderedContentPath);
+         navigateTo(source, renderedContentPath);
          return true;
       }
 
       if (source.isSynced()) {
          if (passthroughHtmlRenderer.supports(source) || passthroughXmlRenderer.supports(source)) {
-            browser.navigateTo(path);
+            navigateTo(source, path);
             return true;
          }
       } else {
          if (passthroughHtmlRenderer.supports(source)) {
-            browser.navigateTo(asNonNull(renderCache.computeIfAbsent(source, sourceArg -> {
+            navigateTo(source, asNonNull(renderCache.computeIfAbsent(source, sourceArg -> {
                final var htmlBuilder = new StringBuilder();
                htmlBuilder.append(source.contentAsString());
                adjustHTML(path, htmlBuilder);
@@ -134,7 +184,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
          }
 
          if (passthroughXmlRenderer.supports(source)) {
-            browser.navigateTo(asNonNull(renderCache.computeIfAbsent(source, sourceArg -> source.contentAsString(), "xml")));
+            navigateTo(source, asNonNull(renderCache.computeIfAbsent(source, sourceArg -> source.contentAsString(), "xml")));
             return true;
          }
       }

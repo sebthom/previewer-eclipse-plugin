@@ -39,6 +39,36 @@
 
 
    <!-- ===================================== -->
+   <!-- View - Toolbar - Zoom                 -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.menus">
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.ZoomIn"
+            icon="src/main/resources/images/zoomIn.png" style="push" />
+      </menuContribution>
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.ZoomReset"
+            icon="src/main/resources/images/zoomReset.png" style="push" />
+      </menuContribution>
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <command commandId="de.sebthom.eclipse.previewer.command.ZoomOut"
+            icon="src/main/resources/images/zoomOut.png" style="push" />
+      </menuContribution>
+   </extension>
+   <extension point="org.eclipse.ui.commands">
+      <command id="de.sebthom.eclipse.previewer.command.ZoomIn"
+         defaultHandler="de.sebthom.eclipse.previewer.command.ZoomIn"
+         name="Zoom In" />
+      <command id="de.sebthom.eclipse.previewer.command.ZoomReset"
+         defaultHandler="de.sebthom.eclipse.previewer.command.ZoomReset"
+         name="Reset Zoom" />
+      <command id="de.sebthom.eclipse.previewer.command.ZoomOut"
+         defaultHandler="de.sebthom.eclipse.previewer.command.ZoomOut"
+         name="Zoom Out" />
+   </extension>
+
+
+   <!-- ===================================== -->
    <!-- View - Toolbar - Refresh              -->
    <!-- ===================================== -->
    <extension point="org.eclipse.ui.menus">
@@ -50,8 +80,7 @@
    <extension point="org.eclipse.ui.commands">
       <command id="de.sebthom.eclipse.previewer.command.RefreshPreview"
          defaultHandler="de.sebthom.eclipse.previewer.command.RefreshPreview"
-         name="Refresh">
-      </command>
+         name="Refresh" />
    </extension>
 
 

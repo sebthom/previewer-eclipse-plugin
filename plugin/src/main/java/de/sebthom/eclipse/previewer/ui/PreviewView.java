@@ -43,4 +43,12 @@ public final class PreviewView extends ViewPart {
    public void setFocus() {
       content.setFocus();
    }
+
+   public float getZoom() {
+      return content.getZoom();
+   }
+
+   public void setZoom(final float zoom) {
+      content.setZoom(zoom);
+   }
 }
