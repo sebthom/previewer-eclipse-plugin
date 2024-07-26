@@ -22,6 +22,7 @@ This **extensible** [EclipseⓇ](https://eclipse.org) plugin contributes a new *
 opened in text editors.
 
 The following formats are supported out of the box:
+- [Draw.io](https://www.drawio.com/) diagrams
 - [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/)
 - GraphViz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
@@ -125,6 +126,8 @@ To build the project follow these steps:
 
 
 ## <a name="acknowledgement"></a>Acknowledgement
+
+Draw.io diagrams are rendered using https://www.draw.io/js/viewer.min.js, which is licensed under [Apache License 2.0 ](https://github.com/jgraph/drawio/blob/dev/LICENSE).
 
 By default, GraphViz DOT files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
 

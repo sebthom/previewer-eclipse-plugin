@@ -47,6 +47,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="de.sebthom.eclipse.previewer.drawio"
+         version="0.0.0"/>
+
+   <plugin
          id="de.sebthom.eclipse.previewer.graphviz"
          version="0.0.0"/>
 
