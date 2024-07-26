@@ -16,7 +16,6 @@
       <version>1.0.0-SNAPSHOT</version>
    </parent>
 
-   <name>previewer-eclipse-plugin</name>
    <artifactId>de.sebthom.eclipse.previewer.graphviz</artifactId>
    <packaging>eclipse-plugin</packaging>
 
