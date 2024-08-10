@@ -37,9 +37,9 @@
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.apache.commons.lang3" version="3.12.0" match="greaterOrEqual"/>
-      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.20240625-1932" match="greaterOrEqual"/>
-      <import plugin="net.sf.jstuff.core" version="7.12.0" match="compatible"/>
+      <import plugin="org.apache.commons.lang3" version="3.16.0" match="greaterOrEqual"/>
+      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.20240810-1938" match="greaterOrEqual"/>
+      <import plugin="net.sf.jstuff.core" version="7.13.0" match="compatible"/>
    </requires>
 
    <plugin
