@@ -12,6 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
@@ -33,6 +36,11 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
    public MarkdownHtmlPreviewRenderer() throws IOException {
       cssDark = Plugin.resources().extract(Constants.MARKDOWN_CSS_DARK);
       cssLight = Plugin.resources().extract(Constants.MARKDOWN_CSS_LIGHT);
+   }
+
+   private int getPreferredTabSize() {
+      return InstanceScope.INSTANCE.getNode("org.eclipse.ui.editors") //
+         .getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 4);
    }
 
    @Override
@@ -73,6 +81,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append("<head>");
       out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
       out.append("<link rel='stylesheet' href='" + (isDarkEclipseTheme() ? cssDark : cssLight).toURI() + "'>");
+      out.append("<style>* { tab-size: " + getPreferredTabSize() + " !important}</style>");
       out.append("</head>");
       out.append("<body class='markdown-body' style='padding:5px'>\n\n");
       out.append(htmlBody);
