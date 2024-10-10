@@ -40,7 +40,7 @@ public final class NetUtils {
                if (proxyCfg.isRequiresAuthentication()) {
                   httpClientBuilder.authenticator(new Authenticator() {
                      @Override
-                     protected PasswordAuthentication getPasswordAuthentication() {
+                     protected @Nullable PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(proxyCfg.getUserId(), proxyCfg.getPassword().toCharArray());
                      }
                   });
