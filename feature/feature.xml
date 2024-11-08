@@ -38,8 +38,8 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.apache.commons.lang3" version="3.17.0" match="greaterOrEqual"/>
-      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.202401010-1826" match="greaterOrEqual"/>
-      <import plugin="net.sf.jstuff.core" version="8.0.0" match="compatible"/>
+      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.20241108-1431" match="greaterOrEqual"/>
+      <import plugin="net.sf.jstuff.core" version="8.0.1" match="compatible"/>
    </requires>
 
    <plugin
