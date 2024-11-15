@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import de.sebthom.eclipse.previewer.Plugin;
-import net.sf.jstuff.core.security.Base64;
+import net.sf.jstuff.core.security.Hash;
 
 /**
  * @author Sebastian Thomschke
@@ -42,7 +42,7 @@ abstract class AbstractRenderCache implements RenderCache {
    }
 
    Path getCacheEntryDir(final Path sourcePath) {
-      return cacheRoot.resolve(Base64.encode(sourcePath.toString()));
+      return cacheRoot.resolve(Hash.SHA256.hash(sourcePath.toString()));
    }
 
    private void removeStaleCacheEntries() {
