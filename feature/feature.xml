@@ -87,6 +87,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.commonmark.commonmark-ext-footnotes"
+         version="0.0.0"/>
+
+   <plugin
          id="org.commonmark.commonmark-ext-gfm-strikethrough"
          version="0.0.0"/>
 
@@ -95,7 +99,23 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.commonmark.commonmark-ext-heading-anchor"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-image-attributes"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-ins"
+         version="0.0.0"/>
+
+   <plugin
          id="org.commonmark.commonmark-ext-task-list-items"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.commonmark.commonmark-ext-yaml-front-matter"
          version="0.0.0"/>
 
    <plugin
