@@ -19,7 +19,7 @@
    <!-- Renderers                             -->
    <!-- ===================================== -->
    <extension point="de.sebthom.eclipse.previewer.renderers">
-      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.markdown.MarkdownHtmlPreviewRenderer" file-extensions="md,mdown,markdown">
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.markdown.MarkdownHtmlPreviewRenderer" file-extensions="md,mdown,markdown,mdx">
          <content-type id="text.html.markdown" />
          <content-type id="text.md" />
       </htmlPreviewRenderer>
