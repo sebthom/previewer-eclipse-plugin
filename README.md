@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/sebthom/previewer-eclipse-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/sebthom/previewer-eclipse-plugin/actions/workflows/build.yml)
 [![License](https://img.shields.io/github/license/sebthom/previewer-eclipse-plugin.svg?color=blue)](LICENSE.txt)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 [![Eclipse Marketplace](https://img.shields.io/eclipse-marketplace/dt/previewer-plugin?logo=eclipse&label=Downloads)](https://marketplace.eclipse.org/content/previewer-plugin)
 
 
@@ -48,7 +48,7 @@ which provide syntax highlighting for the supported source files.
 To install the plugin into an existing Eclipse installation do:
 1. Within Eclipse go to: Help -> Install New Software...
 1. Enter the following update site URL: https://raw.githubusercontent.com/sebthom/previewer-eclipse-plugin/updatesite
-1. Select the `Find/Replace View` feature to install.
+1. Select the `Previewer` feature to install.
 1. Ensure that the option `Contact all update sites during install to find required software` is enabled.
 1. Click `Next` twice.
 1. Read/accept the license terms and click `Finish`.
@@ -127,17 +127,17 @@ To build the project follow these steps:
 
 ## <a name="acknowledgement"></a>Acknowledgement
 
-Draw.io diagrams are rendered using https://www.draw.io/js/viewer.min.js, which is licensed under [Apache License 2.0 ](https://github.com/jgraph/drawio/blob/dev/LICENSE).
+**Draw.io** diagrams are rendered using https://www.draw.io/js/viewer.min.js, which is licensed under [Apache License 2.0 ](https://github.com/jgraph/drawio/blob/dev/LICENSE).
 
-By default, GraphViz DOT files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
+By default, **GraphViz DOT** files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
 
-By default, Markdown files are rendered using a bundled version of [CommonMark Java](https://github.com/commonmark/commonmark-java), which is licensed under [BSD-2-Clause](https://github.com/commonmark/commonmark-java/blob/main/LICENSE.txt).
+By default, **Markdown** files are rendered using a bundled version of [CommonMark Java](https://github.com/commonmark/commonmark-java), which is licensed under [BSD-2-Clause](https://github.com/commonmark/commonmark-java/blob/main/LICENSE.txt).
 
-Rendered Markdown files are styled using [GitHub MarkDown CSS](https://github.com/sindresorhus/github-markdown-css/), which is licensed under [MIT](https://github.com/sindresorhus/github-markdown-css/blob/main/license).
+Rendered **Markdown** files are styled using [GitHub MarkDown CSS](https://github.com/sindresorhus/github-markdown-css/), which is licensed under [MIT](https://github.com/sindresorhus/github-markdown-css/blob/main/license).
 
-Mermaid files are rendered using a bundled version of [Mermaid JS](https://github.com/mermaid-js/mermaid), which is licensed under [MIT](https://github.com/mermaid-js/mermaid/blob/develop/LICENSE).
+**Mermaid** files are rendered using a bundled version of [Mermaid JS](https://github.com/mermaid-js/mermaid), which is licensed under [MIT](https://github.com/mermaid-js/mermaid/blob/develop/LICENSE).
 
-PlantUML files are rendered using a bundled version of [PlantUML](https://github.com/plantuml/plantuml/), which is licensed under [MIT](https://github.com/plantuml/plantuml/blob/master/plantuml-mit/mit-license.txt)
+**PlantUML** files are rendered using a bundled version of [PlantUML](https://github.com/plantuml/plantuml/), which is licensed under [MIT](https://github.com/plantuml/plantuml/blob/master/plantuml-mit/mit-license.txt)
 
 
 ## <a name="license"></a>License
