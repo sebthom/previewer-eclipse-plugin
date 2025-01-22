@@ -31,11 +31,19 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
+
+      out.append("""
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+         </head>
+         <body>
+         """);
+
+      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
+
       final var renderer = PluginPreferences.getGraphvizRenderer();
-
-      final var htmlBody = new StringBuilder();
-
-      renderer.dotToHTML(source, htmlBody);
 
       final var rendererName = renderer instanceof GraphVizNativeRenderer //
             ? "dot"
@@ -43,14 +51,6 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
                   ? "viz.js"
                   : renderer.getClass().getSimpleName();
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
-      out.append("<!DOCTYPE html>");
-      out.append("<html>");
-      out.append("<head>");
-      out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-      out.append("</head>");
-      out.append("<body>\n\n");
       if (SystemUtils.IS_OS_WINDOWS) {
          if (renderer instanceof GraphvizEmbeddedRenderer) {
             out.append(
@@ -78,7 +78,8 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
                """);
          }
       }
-      out.append(htmlBody);
+
+      renderer.dotToHTML(source, out);
       out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }

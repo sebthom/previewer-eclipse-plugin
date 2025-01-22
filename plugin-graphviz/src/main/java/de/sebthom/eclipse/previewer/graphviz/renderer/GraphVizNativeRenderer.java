@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferences;
+import de.sebthom.eclipse.previewer.util.StringUtils;
 import net.sf.jstuff.core.io.Processes;
 
 /**
@@ -46,9 +47,6 @@ public class GraphVizNativeRenderer implements GraphvizRenderer {
          proc.terminate();
       }
 
-      // out.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 width height'>\n");
-      //out.append(sb, sb.indexOf("<svg"), sb.length());
-      out.append("<svg width='100%'");
-      out.append(sb, sb.indexOf(" viewBox"), sb.length());
+      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<svg width='100%'" + sb.substring(sb.indexOf(" viewBox"), sb.length())));
    }
 }

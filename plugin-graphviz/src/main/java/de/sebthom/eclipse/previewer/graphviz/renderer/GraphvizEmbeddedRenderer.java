@@ -13,6 +13,7 @@ import java.io.UncheckedIOException;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.graphviz.Constants;
 import de.sebthom.eclipse.previewer.graphviz.Plugin;
+import de.sebthom.eclipse.previewer.util.StringUtils;
 
 /**
  * @author Sebastian Thomschke
@@ -34,14 +35,21 @@ public final class GraphvizEmbeddedRenderer implements GraphvizRenderer {
    @Override
    public void dotToHTML(final ContentSource source, final Appendable out) throws IOException {
       out.append("<script src='" + vizJS.toURI() + "'></script>");
+      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<span id='placeholder'></span>"));
       out.append("""
-         <div id="graph"></div>
          <script>
          Viz.instance().then(function(viz) {
-             var svg = viz.renderSVGElement(`
+           const svg = viz.renderSVGElement(`
              """ + source.contentAsString() + """
-             `);
-             document.getElementById("graph").appendChild(svg);
+           `);
+           try {
+              const placeholder = document.getElementById("placeholder");
+              const parent = placeholder.parentNode;
+              parent.appendChild(svg);
+              parent.removeChild(placeholder);
+           } catch(err){
+             alert(err);
+           }
          });
          </script>
          """);

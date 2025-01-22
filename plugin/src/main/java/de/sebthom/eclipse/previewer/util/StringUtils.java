@@ -16,6 +16,8 @@ import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import net.sf.jstuff.core.Strings;
 
 /**
@@ -92,6 +94,163 @@ public final class StringUtils {
                document.querySelector('#previewer_infobox').classList.add('minimized');
                document.querySelector('#previewer_infobox > span').style.display = 'none';
                document.querySelector('#previewer_infobox button').innerHTML = '&#11164;';
+             }
+           }
+         </script>
+
+         """;
+   }
+
+   public static String htmlSvgWithHoverDownloadButton(final String svgContent) {
+      return Strings.replaceEach("""
+
+         <div id="${SVG_ID}-outer">
+           <button class="download-button" id="${SVG_ID}-download">Download SVG</button>
+           <div id="${SVG_ID}-inner">${SVG}</div>
+         </div>
+
+         <style>
+           #${SVG_ID}-outer {
+             position: relative;
+           }
+
+           #${SVG_ID}-outer:hover .download-button {
+             display: block;
+           }
+
+           #${SVG_ID}-outer .download-button {
+             position: absolute;
+             top: 10px;
+             left: 10px;
+             padding: 5px 10px;
+             font-size: 12px;
+             background-color: rgba(0, 0, 0, 0.7);
+             color: white;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             display: none;
+           }
+         </style>
+
+         <script>
+           document.getElementById("${SVG_ID}-download").addEventListener("click", function () {
+             try {
+               const svgString = document.getElementById("${SVG_ID}-inner").innerHTML;
+               const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+               if (window.navigator.msSaveOrOpenBlob) {
+                 window.navigator.msSaveOrOpenBlob(blob, "graphic.svg");
+               } else {
+                 const downloadLink = document.createElement("a");
+                 downloadLink.href = URL.createObjectURL(blob);
+                 downloadLink.download = "graphic.svg";
+                 document.body.appendChild(downloadLink);
+                 downloadLink.click();
+                 document.body.removeChild(downloadLink);
+               }
+            } catch (err) {
+              alert(err);
+            }
+           });
+         </script>
+
+         """, "${SVG_ID}", RandomStringUtils.insecure().nextAlphabetic(16), "${SVG}", svgContent);
+   }
+
+   public static String htmlSvgZoomControls() {
+      return """
+
+         <style>
+           media print {
+             .no-print, .no-print * { display: none !important; }
+           }
+           #zoom-controls {
+             cursor: move;
+             opacity: 0.8;
+             z-index:10;
+             position: fixed;
+             top: 5px;
+             left: 5px;
+             background-color: #f1f1f1;
+             padding: 5px;
+             border: 1px solid #ccc;
+             border-radius: 5px;
+             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+           }
+           #zoom-controls button {
+             cursor: default;
+             margin: 2px;
+             padding-left: 5px;
+             padding-right: 5px;
+             font-family: sans-serif;
+             font-size: 0.8em;
+           }
+         </style>
+
+         <div id="zoom-controls" class="no-zoom no-print">
+           <button id="zoom-in">+</button>
+           <button id="zoom-reset">Reset</button>
+           <button id="zoom-out">-</button>
+         </div>
+
+         <script>
+           function makeMovable(elem) {
+             elem.addEventListener('mousedown', function(e) {
+               const offsetX = e.clientX - elem.getBoundingClientRect().left;
+               const offsetY = e.clientY - elem.getBoundingClientRect().top;
+
+               function mouseMoveHandler(e) {
+                 elem.style.left = (e.clientX - offsetX) + "px";
+                 elem.style.top = (e.clientY - offsetY) + "px";
+               }
+
+               function mouseUpHandler() {
+                 document.removeEventListener('mousemove', mouseMoveHandler);
+                 document.removeEventListener('mouseup', mouseUpHandler);
+               }
+
+               document.addEventListener('mousemove', mouseMoveHandler);
+               document.addEventListener('mouseup', mouseUpHandler);
+             });
+           }
+           makeMovable(document.getElementById('zoom-controls'));
+
+           function getZoomLevel(elem) {
+             const transform = elem.style.transform;
+             if (!transform) return 1;
+
+             const scaleMatch = transform.match(/scale\\(([^)]+)\\)/);
+             return scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+           }
+           function setZoom(elem, level) {
+             elem.style.transform = "scale(" + level + ")";
+             elem.style.transformOrigin = '0 0';
+           }
+
+           document.getElementById('zoom-in').addEventListener('click', function () {
+             document.querySelectorAll('svg').forEach(function (elem) {
+               setZoom(elem, getZoomLevel(elem) + 0.1);
+             });
+           });
+
+           document.getElementById('zoom-out').addEventListener('click', function () {
+             document.querySelectorAll('svg').forEach(function (elem) {
+               setZoom(elem, getZoomLevel(elem) - 0.1);
+             });
+           });
+
+           document.getElementById('zoom-reset').addEventListener('click', function () {
+             document.querySelectorAll('svg').forEach(function (elem) {
+               setZoom(elem, 1);
+             });
+           });
+
+           if (window.navigator.userAgent.match(/MSIE|Trident|Edge/)) {
+             if (window.NodeList && !NodeList.prototype.forEach) {
+               NodeList.prototype.forEach = Array.prototype.forEach;
+             }
+             if (window.HTMLCollection && !HTMLCollection.prototype.forEach) {
+               HTMLCollection.prototype.forEach = Array.prototype.forEach;
              }
            }
          </script>

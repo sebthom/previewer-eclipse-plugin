@@ -36,16 +36,18 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
+
+      out.append("""
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+         </head>
+         <body>
+         """);
+
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
-      out.append("<!DOCTYPE html>");
-      out.append("<html>");
-      out.append("<head>");
-      out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-      out.append("<script src='" + mermaidJS.toURI() + "'></script>");
-      out.append("<script>mermaid.initialize({ startOnLoad: true });</script>");
-      out.append("</head>");
-      out.append("<body>\n\n");
       if (SystemUtils.IS_OS_WINDOWS) {
          out.append(
             """
@@ -62,10 +64,29 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
                </script>
                """);
       }
+
+      out.append("<script src='" + mermaidJS.toURI() + "'></script>");
+      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<span id='placeholder'></span>"));
       out.append("""
-         <pre class="mermaid" style="width:100%">
-         """ + Strings.replace(source.contentAsString(), "<", "&lt;") + """
+         <pre id="mermaid" style="width:100%">
+           """ + Strings.replace(source.contentAsString(), "<", "&lt;") + """
          </pre>
+         <script>
+           try {
+             mermaid.initialize({ startOnLoad: false });
+             mermaid.run({
+               querySelector: '#mermaid',
+             }).then(() => {
+               const svg = document.querySelector("#mermaid svg");
+               const placeholder = document.getElementById("placeholder");
+               const parent = placeholder.parentNode;
+               parent.appendChild(svg);
+               parent.removeChild(placeholder);
+             });
+           } catch(err) {
+             alert(err);
+           }
+         </script>
          """);
       out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");

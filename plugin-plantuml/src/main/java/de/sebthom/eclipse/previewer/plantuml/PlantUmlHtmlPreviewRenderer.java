@@ -38,24 +38,27 @@ public class PlantUmlHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
+
+      out.append("""
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+         </head>
+         <body>
+         """);
+
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
       final var reader = new SourceStringReader(source.contentAsString());
       final var baos = new ByteArrayOutputStream();
-
-      out.append("<!DOCTYPE html>");
-      out.append("<html>");
-      out.append("<head>");
-      out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-      out.append("</head>");
-      out.append("<body>\n\n");
 
       TitledDiagram.FORCE_SMETANA = "smetana".equals(PluginPreferences.getPlantUmlLayoutEngine());
 
       final var blocks = reader.getBlocks();
       if (blocks.isEmpty()) {
          reader.noValidStartFound(baos, SVG_FORMAT);
-         out.append(new String(baos.toByteArray(), StandardCharsets.UTF_8));
+         out.append(StringUtils.htmlSvgWithHoverDownloadButton(new String(baos.toByteArray(), StandardCharsets.UTF_8)));
       } else {
          for (final BlockUml block : blocks) {
             final Diagram system = block.getDiagram();
@@ -63,11 +66,10 @@ public class PlantUmlHtmlPreviewRenderer implements HtmlPreviewRenderer {
             for (int j = 0; j < imageCount; j++) {
                baos.reset();
                system.exportDiagram(baos, j, SVG_FORMAT);
-               out.append(new String(baos.toByteArray(), StandardCharsets.UTF_8));
+               out.append(StringUtils.htmlSvgWithHoverDownloadButton(new String(baos.toByteArray(), StandardCharsets.UTF_8)));
             }
          }
       }
-
       out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }

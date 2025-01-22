@@ -27,19 +27,20 @@ public class SvgPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
+
+      out.append("""
+         <!DOCTYPE html>
+         <html>
+         <head>
+           <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+         </head>
+         <body class='markdown-body' style='padding:5px'>
+         """);
+
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
-      out.append("<!DOCTYPE html>");
-      out.append("<html><body>");
-      out.append("<head>");
-      out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-      out.append("</head>");
-      out.append("<body class='markdown-body' style='padding:5px'>\n\n");
-
-      out.append("<svg viewBox='0 0 width height' ");
-      //out.append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 width height'>\n");
-      out.append(Strings.substringBetween(source.contentAsString(), "<svg ", "</svg>"));
-      out.append("</svg>");
+      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<svg viewBox='0 0 width height' " + Strings.substringBetween(source
+         .contentAsString(), "<svg ", "</svg>") + "</svg>"));
       out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
