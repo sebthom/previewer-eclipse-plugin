@@ -3,7 +3,7 @@
 <schema targetNamespace="de.sebthom.eclipse.previewer" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="de.sebthom.eclipse.previewer" id="de.sebthom.eclipse.previewer" name="Preview Renderer"/>
+         <meta.schema plugin="de.sebthom.eclipse.previewer" id="renderers" name="Preview Renderers"/>
       </appinfo>
       <documentation>
          Extension point to register preview renderers.
@@ -154,14 +154,6 @@
 
 
 
-   <annotation>
-      <appinfo>
-         <meta.section type="implementation"/>
-      </appinfo>
-      <documentation>
-         This plugin itself does not have any predefined renderers
-      </documentation>
-   </annotation>
 
 
 </schema>
