@@ -29,6 +29,7 @@ The following formats are supported out of the box:
 - [Mermaid](https://mermaid.js.org/) diagrams
 - [PlantUML](https://plantuml.com/) diagrams
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
+- Terrastruct [D2](https://d2lang.com/) diagrams (requires `d2` executable from https://github.com/terrastruct/d2/releases installed locally)
 
 This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
 and [Extra Syntax Highlighting Plugin](https://github.com/sebthom/extra-syntax-highlighting-eclipse-plugin)

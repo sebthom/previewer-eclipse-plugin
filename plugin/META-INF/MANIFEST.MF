@@ -12,6 +12,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ClassPath: .
 Export-Package: de.sebthom.eclipse.previewer.api,
  de.sebthom.eclipse.previewer.util;x-friends:="
+ de.sebthom.eclipse.previewer.d2,
  de.sebthom.eclipse.previewer.drawio,
  de.sebthom.eclipse.previewer.graphviz,
  de.sebthom.eclipse.previewer.markdown,

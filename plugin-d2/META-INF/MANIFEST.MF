@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %PluginName
+Bundle-SymbolicName: de.sebthom.eclipse.previewer.d2;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Sebastian Thomschke
+Bundle-Localization: src/main/java/de/sebthom/eclipse/previewer/d2/localization/messages
+Automatic-Module-Name: de.sebthom.eclipse.previewer.d2
+Bundle-Activator: de.sebthom.eclipse.previewer.d2.Plugin
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-ClassPath: .
+Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
+ org.eclipse.core.filebuffers,
+ org.eclipse.core.net,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.osgi,
+ org.eclipse.jface.text,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.workbench.texteditor,
+ org.apache.commons.commons-io;bundle-version="[2.17.0,3.0.0)",
+ org.apache.commons.lang3;bundle-version="[3.17.0,4.0.0)",
+ net.sf.jstuff.core;bundle-version="[8.1.0,9.0.0)",
+ de.sebthom.eclipse.commons;bundle-version="[1.0.0.20250222-0150,2.0.0)",
+ de.sebthom.eclipse.previewer;bundle-version="[1.0.0,2.0.0)"
