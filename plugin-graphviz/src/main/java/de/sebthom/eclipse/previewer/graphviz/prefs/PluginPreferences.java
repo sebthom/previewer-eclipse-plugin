@@ -23,21 +23,22 @@ import net.sf.jstuff.core.io.RuntimeIOException;
  */
 public final class PluginPreferences {
 
-   public static final class Initializer extends AbstractPreferenceInitializer {
-
-      @Override
-      public void initializeDefaultPreferences() {
-         STORE.setDefault(PREF_GRAPHVIZ_RENDERER, "java");
-         STORE.setDefault(PREF_GRAPHVIZ_NATIVE_EXE, "dot");
-         STORE.setDefault(PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_JAVA, true);
-      }
-   }
-
    public static final IPersistentPreferenceStore STORE = Plugin.get().getPreferenceStore();
 
    public static final String PREF_GRAPHVIZ_RENDERER = "graphvizRenderer";
+   public static final String PREF_GRAPHVIZ_RENDERER_EMBEDDED = "embedded";
+   public static final String PREF_GRAPHVIZ_RENDERER_NATIVE = "native";
    public static final String PREF_GRAPHVIZ_NATIVE_EXE = "graphvizNativeExe";
-   public static final String PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_JAVA = "graphvizNativeFallbackToJava";
+   public static final String PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_EMBEDDED = "graphvizNativeFallbackToEmbedded";
+
+   public static final class Initializer extends AbstractPreferenceInitializer {
+      @Override
+      public void initializeDefaultPreferences() {
+         STORE.setDefault(PREF_GRAPHVIZ_RENDERER, PREF_GRAPHVIZ_RENDERER_EMBEDDED);
+         STORE.setDefault(PREF_GRAPHVIZ_NATIVE_EXE, "dot");
+         STORE.setDefault(PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_EMBEDDED, true);
+      }
+   }
 
    public static void addListener(final IPropertyChangeListener listener) {
       STORE.addPropertyChangeListener(listener);
@@ -58,17 +59,18 @@ public final class PluginPreferences {
    }
 
    public static GraphvizRenderer getGraphvizRenderer() {
-      return "native".equals(STORE.getString(PREF_GRAPHVIZ_RENDERER)) //
-            ? GraphVizNativeRenderer.INSTANCE
-            : GraphvizEmbeddedRenderer.INSTANCE;
+      final boolean wantsNative = PREF_GRAPHVIZ_RENDERER_NATIVE.equals(STORE.getString(PREF_GRAPHVIZ_RENDERER));
+      if (wantsNative) {
+         final boolean nativeAvailable = GraphVizNativeRenderer.INSTANCE.isAvailable();
+         final boolean fallbackAllowed = STORE.getBoolean(PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_EMBEDDED);
+         if (nativeAvailable || !fallbackAllowed)
+            return GraphVizNativeRenderer.INSTANCE;
+      }
+      return GraphvizEmbeddedRenderer.INSTANCE;
    }
 
    public static String getGraphvizNativeExe() {
       return STORE.getString(PREF_GRAPHVIZ_NATIVE_EXE);
-   }
-
-   public static int getGraphvizNativeFallbackToJava() {
-      return STORE.getInt(PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_JAVA);
    }
 
    private PluginPreferences() {

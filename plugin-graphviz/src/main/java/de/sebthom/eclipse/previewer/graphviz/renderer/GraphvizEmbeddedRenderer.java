@@ -18,13 +18,13 @@ import de.sebthom.eclipse.previewer.util.StringUtils;
 /**
  * @author Sebastian Thomschke
  */
-public final class GraphvizEmbeddedRenderer implements GraphvizRenderer {
+public enum GraphvizEmbeddedRenderer implements GraphvizRenderer {
 
-   public static final GraphvizEmbeddedRenderer INSTANCE = new GraphvizEmbeddedRenderer();
+   INSTANCE;
 
    private final File vizJS;
 
-   public GraphvizEmbeddedRenderer() {
+   GraphvizEmbeddedRenderer() {
       try {
          vizJS = Plugin.resources().extract(Constants.VIZ_JS);
       } catch (final IOException ex) {

@@ -30,8 +30,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
       final var parent = getFieldEditorParent();
 
       final var rendererCombo = new ComboFieldEditor(PluginPreferences.PREF_GRAPHVIZ_RENDERER, "Graphviz Renderer:", new String[][] { //
-         {"GraphViz dot (external)", "native"}, //
-         {"viz.js (built-in)", "embedded"} //
+         {"GraphViz dot (external)", PluginPreferences.PREF_GRAPHVIZ_RENDERER_NATIVE}, //
+         {"viz.js (built-in)", PluginPreferences.PREF_GRAPHVIZ_RENDERER_EMBEDDED} //
       }, parent);
       addField(rendererCombo);
 
@@ -41,7 +41,7 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
             protected boolean checkState() {
                final var renderer = rendererCombo.getPreferenceStore().getString(rendererCombo.getPreferenceName());
 
-               if (!"native".equals(renderer))
+               if (!PluginPreferences.PREF_GRAPHVIZ_RENDERER_NATIVE.equals(renderer))
                   return true;
 
                String msg = null;
@@ -69,7 +69,7 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
                return true;
             }
          }, //
-         new BooleanFieldEditor(PluginPreferences.PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_JAVA,
+         new BooleanFieldEditor(PluginPreferences.PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_EMBEDDED,
             "Use embedded renderer when native renderer is unavailable", group)) //
       ));
    }

@@ -7,6 +7,8 @@
 package de.sebthom.eclipse.previewer.graphviz.renderer;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -14,14 +16,26 @@ import org.apache.commons.io.IOUtils;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.util.StringUtils;
+import net.sf.jstuff.core.SystemUtils;
 import net.sf.jstuff.core.io.Processes;
 
 /**
  * @author Sebastian Thomschke
  */
-public class GraphVizNativeRenderer implements GraphvizRenderer {
+public enum GraphVizNativeRenderer implements GraphvizRenderer {
 
-   public static final GraphVizNativeRenderer INSTANCE = new GraphVizNativeRenderer();
+   INSTANCE;
+
+   public boolean isAvailable() {
+      var exe = Path.of(PluginPreferences.getGraphvizNativeExe());
+      if (exe.getParent() == null) { // check if exe is given without path
+         final var foundPath = SystemUtils.findExecutable(exe.toString(), false);
+         if (foundPath != null) {
+            exe = foundPath;
+         }
+      }
+      return Files.isExecutable(exe);
+   }
 
    @Override
    public void dotToHTML(final ContentSource source, final Appendable out) throws IOException {
