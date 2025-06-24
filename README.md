@@ -1,8 +1,8 @@
 # previewer-eclipse-plugin
 
 [![Build Status](https://github.com/sebthom/previewer-eclipse-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/sebthom/previewer-eclipse-plugin/actions/workflows/build.yml)
-[![License](https://img.shields.io/github/license/sebthom/previewer-eclipse-plugin.svg?color=blue)](LICENSE.txt)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.1%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![License](https://img.shields.io/github/license/sebthom/previewer-eclipse-plugin.svg?color=blue)](LICENSE.txt)
 [![Eclipse Marketplace](https://img.shields.io/eclipse-marketplace/dt/previewer-plugin?logo=eclipse&label=Downloads)](https://marketplace.eclipse.org/content/previewer-plugin)
 
 
