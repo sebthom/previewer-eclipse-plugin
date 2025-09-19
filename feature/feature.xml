@@ -75,47 +75,47 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.autolink"
+         id="org.nibor.autolink"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark"
+         id="org.commonmark"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-autolink"
+         id="org.commonmark.ext-autolink"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-footnotes"
+         id="org.commonmark.ext-footnotes"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-gfm-strikethrough"
+         id="org.commonmark.ext-gfm-strikethrough"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-gfm-tables"
+         id="org.commonmark.ext-gfm-tables"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-heading-anchor"
+         id="org.commonmark.ext-heading-anchor"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-image-attributes"
+         id="org.commonmark.ext-image-attributes"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-ins"
+         id="org.commonmark.ext-ins"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-task-list-items"
+         id="org.commonmark.ext-task-list-items"
          version="0.0.0"/>
 
    <plugin
-         id="org.commonmark.commonmark-ext-yaml-front-matter"
+         id="org.commonmark.ext-yaml-front-matter"
          version="0.0.0"/>
 
    <plugin
