@@ -10,5 +10,5 @@ package de.sebthom.eclipse.previewer.graphviz;
  * @author Sebastian Thomschke
  */
 public interface Constants {
-   String VIZ_JS = "src/main/resources/viz-js/viz-standalone.js";
+   String VIZ_JS = "src/main/resources/viz-js/viz-global.js";
 }
