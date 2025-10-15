@@ -28,6 +28,30 @@ public final class MiscUtils {
       return LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
    }
 
+   /**
+    * Applies basic Markdown formatting to a {@link StyledText} widget.
+    * <p>
+    * This method parses a limited subset of Markdown syntax in the provided text
+    * and applies corresponding SWT style ranges to visually format the text.
+    * Supported Markdown directives include:
+    * </p>
+    * <ul>
+    * <li><b>Bold</b> — <code>**text**</code></li>
+    * <li><b>Inline code</b> — <code>`code`</code></li>
+    * <li><b>Code block</b> — <code>```block```</code></li>
+    * </ul>
+    *
+    * <p>
+    * <b>Example:</b>
+    * </p>
+    * <pre>{@code
+    * var styledText = new StyledText(parent, SWT.NONE);
+    * MiscUtils.setMarkdown(styledText, "This is **bold**, `inline code`, and ```block code```.");
+    * }</pre>
+    *
+    * @param styledText the {@link StyledText} control to which the formatted text will be applied
+    * @param markdown the input string containing Markdown-formatted text
+    */
    public static void setMarkdown(final StyledText styledText, final String markdown) {
       final var markdownDirectivesPattern = Pattern.compile("" //
             + "\\*\\*(.*?)\\*\\*" + '|' // bold
