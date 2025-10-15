@@ -51,8 +51,8 @@ public final class SerializablePath implements Decorator<Path>, Path, Serializab
 
    @Override
    public boolean equals(final @Nullable Object other) {
-      if (other instanceof SerializablePath)
-         return wrapped.equals(((SerializablePath) other).wrapped);
+      if (other instanceof final SerializablePath otherPath)
+         return wrapped.equals(otherPath.wrapped);
       else if (other instanceof Path)
          return wrapped.equals(other);
 

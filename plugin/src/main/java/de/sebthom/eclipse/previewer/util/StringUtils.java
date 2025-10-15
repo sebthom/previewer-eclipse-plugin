@@ -332,7 +332,7 @@ public final class StringUtils {
                if (!inComment) {
                   if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
                      // ignore whitespace
-                     if (minifiedCss.length() > 0 && !Character.isWhitespace(minifiedCss.charAt(minifiedCss.length() - 1))) {
+                     if (!minifiedCss.isEmpty() && !Character.isWhitespace(minifiedCss.charAt(minifiedCss.length() - 1))) {
                         minifiedCss.append(' ');
                      }
                   } else {
