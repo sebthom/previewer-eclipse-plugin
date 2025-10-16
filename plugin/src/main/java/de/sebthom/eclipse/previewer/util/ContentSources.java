@@ -256,6 +256,17 @@ public final class ContentSources {
       return new PathContentSource(path);
    }
 
+   /**
+    * Creates a ContentSource from a string content with a virtual file name.
+    * Used for e.g. CompareEditor content where we have the document content but not a physical file.
+    */
+   public static ContentSource of(final String filePath, final String content) {
+      // Use the filename directly as a virtual path - only the filename/extension matters for content type detection
+      final Path virtualPath = Path.of(filePath);
+      final long now = System.currentTimeMillis();
+      return new ContentSourceSnapshot(virtualPath, content, now, ContentTypes.of(virtualPath));
+   }
+
    private ContentSources() {
    }
 }

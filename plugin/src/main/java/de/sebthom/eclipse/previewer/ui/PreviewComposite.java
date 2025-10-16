@@ -6,9 +6,10 @@
  */
 package de.sebthom.eclipse.previewer.ui;
 
-import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -18,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -32,9 +32,7 @@ import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.texteditor.ITextEditor;
 
-import de.sebthom.eclipse.commons.ui.Editors;
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
@@ -43,7 +41,10 @@ import de.sebthom.eclipse.previewer.command.ToggleLinkToEditor;
 import de.sebthom.eclipse.previewer.command.ToggleLivePreview;
 import de.sebthom.eclipse.previewer.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
-import de.sebthom.eclipse.previewer.util.ContentSources;
+import de.sebthom.eclipse.previewer.ui.editorsupport.CompareEditorSupport;
+import de.sebthom.eclipse.previewer.ui.editorsupport.EditorSupport;
+import de.sebthom.eclipse.previewer.ui.editorsupport.TextEditorSupport;
+import de.sebthom.eclipse.previewer.ui.editorsupport.TrackedEditorContext;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
 import net.sf.jstuff.core.event.ThrottlingEventDispatcher;
 import net.sf.jstuff.core.exception.Exceptions;
@@ -53,56 +54,7 @@ import net.sf.jstuff.core.exception.Exceptions;
  */
 public final class PreviewComposite extends Composite {
 
-   static final class EditorContext {
-
-      static @Nullable EditorContext get(final ITextEditor editor) {
-         final Path file = Editors.getFilePath(editor);
-         if (file == null)
-            return null;
-         final var doc = Editors.getDocument(editor);
-         if (doc == null)
-            return null;
-         return new EditorContext(editor, file, doc);
-      }
-
-      static @Nullable EditorContext getActive() {
-         final var editor = Editors.getActiveTextEditor();
-         if (editor == null)
-            return null;
-         return get(editor);
-      }
-
-      final IDocument document;
-      final ITextEditor editor;
-      final Path file;
-
-      EditorContext(final ITextEditor editor, final Path file, final IDocument doc) {
-         this.editor = editor;
-         this.file = file;
-         document = doc;
-      }
-
-      @Override
-      public boolean equals(final @Nullable Object obj) {
-         if (this == obj)
-            return true;
-         if (obj instanceof final EditorContext other)
-            return document == other.document && editor == other.editor && file.equals(other.file);
-         return false;
-      }
-
-      @Override
-      public int hashCode() {
-         final int prime = 31;
-         int result = 1;
-         result = prime * result + System.identityHashCode(document);
-         result = prime * result + System.identityHashCode(editor);
-         result = prime * result + System.identityHashCode(file);
-         return result;
-      }
-   }
-
-   private static final String MARKDOWN_WELCOME = "Open a **supported** file in a text editor to see a rendered preview here.";
+   private static final String MARKDOWN_WELCOME = "Open a **supported** file in a text or compare editor to see a rendered preview here.";
    private static final String MARKDOWN_WEBVIEW_CRASHED = """
       If you see this message, it means the **Microsoft Edge WebView2** view has crashed. You can try the following solutions:
 
@@ -112,21 +64,19 @@ public final class PreviewComposite extends Composite {
       4. Download/install a newer WebView2 version from: https://developer.microsoft.com/microsoft-edge/webview2
       """;
 
-   private final ThrottlingEventDispatcher<EditorContext> editorTextModifiedEventDispatcher = ThrottlingEventDispatcher //
-      .builder(EditorContext.class, Duration.ofMillis(1_000)).build();
+   private final ThrottlingEventDispatcher<TrackedEditorContext> editorTextModifiedEventDispatcher = ThrottlingEventDispatcher //
+      .builder(TrackedEditorContext.class, Duration.ofMillis(1_000)).build();
 
    private IPropertyListener editorDirtyStateListener = (source, propId) -> {
-      if (propId == ISaveablePart.PROP_DIRTY //
-            && source instanceof final ITextEditor editor //
-            && !editor.isDirty()) {
-         final var editorCtx = EditorContext.get(editor);
-         if (editorCtx != null) {
-            onDocumentSaved(editorCtx);
+      if (propId == ISaveablePart.PROP_DIRTY && source instanceof final ISaveablePart saveable && !saveable.isDirty()) {
+         final var linkedEditorContext = this.linkedEditorContext;
+         if (linkedEditorContext != null && source == linkedEditorContext.getEditor()) {
+            onDocumentSaved(linkedEditorContext);
          }
       }
    };
 
-   private IPartListener2 editorOpenCloseListener = new IPartListener2() {
+   private IPartListener2 partListener = new IPartListener2() {
 
       @Override
       public void partActivated(final IWorkbenchPartReference partRef) {
@@ -138,40 +88,39 @@ public final class PreviewComposite extends Composite {
           * partBroughtToTop:org.eclipse.ui.internal.EditorReference@7c5a7f
           * partActivated:org.eclipse.ui.internal.EditorReference@7c5a7f
           */
-         if (partRef instanceof final IEditorReference editorRef //
-               && editorRef.getEditor(false) instanceof final ITextEditor editor) {
-
-            final var editorCtx = EditorContext.get(editor);
-            if (editorCtx == null)
-               return;
-
-            final var trackedEditorContext = PreviewComposite.this.trackedEditorContext;
-            if (trackedEditorContext == null || ToggleLinkToEditor.isLinkToEditorEnabled()) {
-               if (trackedEditorContext != null) {
-                  trackedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
-                  trackedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+         if (partRef instanceof final IEditorReference editorRef) {
+            for (final var support : editorSupports) {
+               final TrackedEditorContext newEditorContext = support.createFrom(editorRef);
+               if (newEditorContext != null) {
+                  final var linkedEditorContext = PreviewComposite.this.linkedEditorContext;
+                  if (linkedEditorContext == null || ToggleLinkToEditor.isLinkToEditorEnabled()) {
+                     if (linkedEditorContext != null) {
+                        linkedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
+                        linkedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+                        linkedEditorContext.close();
+                     }
+                     newEditorContext.editor.addPropertyListener(editorDirtyStateListener);
+                     newEditorContext.document.addDocumentListener(editorTextModifiedListener);
+                     PreviewComposite.this.linkedEditorContext = newEditorContext;
+                     render(newEditorContext, false);
+                  }
+                  break;
                }
-
-               editorCtx.editor.addPropertyListener(editorDirtyStateListener);
-               editorCtx.document.addDocumentListener(editorTextModifiedListener);
-               PreviewComposite.this.trackedEditorContext = editorCtx;
-
-               render(editorCtx, false);
             }
          }
       }
 
       @Override
       public void partClosed(final IWorkbenchPartReference partRef) {
-         if (Editors.getActiveTextEditor() == null) {
-            final var trackedEditorContext = PreviewComposite.this.trackedEditorContext;
-            if (trackedEditorContext != null) {
-               trackedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
-               trackedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+         if (partRef instanceof final IEditorReference editorRef) {
+            final var linkedEditorContext = PreviewComposite.this.linkedEditorContext;
+            if (linkedEditorContext != null && editorRef.getEditor(false) == linkedEditorContext.editor) {
+               linkedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
+               linkedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+               linkedEditorContext.close();
+               PreviewComposite.this.linkedEditorContext = null;
+               showMessage(MARKDOWN_WELCOME);
             }
-            PreviewComposite.this.trackedEditorContext = null;
-
-            showMessage(MARKDOWN_WELCOME);
          }
       }
    };
@@ -183,14 +132,9 @@ public final class PreviewComposite extends Composite {
 
       @Override
       public void documentChanged(final DocumentEvent event) {
-         final var editor = Editors.getActiveTextEditor();
-         if (editor == null)
-            return;
-         final var editorCtx = EditorContext.get(editor);
-         if (editorCtx == null)
-            return;
-         if (editorCtx.document == event.getDocument()) {
-            editorTextModifiedEventDispatcher.fire(editorCtx);
+         final var linkedEditorContext = PreviewComposite.this.linkedEditorContext;
+         if (linkedEditorContext != null && linkedEditorContext.document == event.getDocument()) {
+            editorTextModifiedEventDispatcher.fire(linkedEditorContext);
          }
       }
    };
@@ -199,13 +143,14 @@ public final class PreviewComposite extends Composite {
    private final Map<PreviewRendererExtension<PreviewRenderer>, Composite> renderers = new LinkedHashMap<>();
    private final StackLayout stack = new StackLayout();
    private StyledText infoPanel;
-   private @Nullable EditorContext trackedEditorContext;
+   private @Nullable TrackedEditorContext linkedEditorContext;
+   private final List<EditorSupport> editorSupports = new ArrayList<>();
 
    public PreviewComposite(final Composite parent, final PreviewView viewPart) {
       super(parent, SWT.NONE);
 
       partService = viewPart.getSite().getWorkbenchWindow().getPartService();
-      partService.addPartListener(editorOpenCloseListener);
+      partService.addPartListener(partListener);
 
       setLayout(stack);
 
@@ -222,30 +167,37 @@ public final class PreviewComposite extends Composite {
       editorTextModifiedEventDispatcher.subscribe(this::onDocumentEdited);
 
       loadRenderersFromExtensionPoints();
+
+      // register editor supports in precedence order
+      editorSupports.add(new TextEditorSupport());
+      editorSupports.add(new CompareEditorSupport());
    }
 
    @Override
    public void dispose() {
-      partService.removePartListener(editorOpenCloseListener);
+      partService.removePartListener(partListener);
       editorTextModifiedEventDispatcher.close();
 
-      final var trackedEditorContext = this.trackedEditorContext;
-      if (trackedEditorContext != null) {
-         trackedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
-         trackedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+      final var linkedEditorContext = this.linkedEditorContext;
+      if (linkedEditorContext != null) {
+         linkedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
+         linkedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+         linkedEditorContext.close();
       }
-      this.trackedEditorContext = null;
+      this.linkedEditorContext = null;
 
       renderers.keySet().forEach(ext -> ext.renderer.dispose());
       renderers.clear();
+
+      editorSupports.clear();
 
       super.dispose();
    }
 
    void forceRefresh() {
-      final var trackedEditorContext = this.trackedEditorContext;
-      if (trackedEditorContext != null) {
-         render(trackedEditorContext, true);
+      final var linkedEditorContext = this.linkedEditorContext;
+      if (linkedEditorContext != null) {
+         render(linkedEditorContext, true);
       }
    }
 
@@ -266,36 +218,37 @@ public final class PreviewComposite extends Composite {
       }
    }
 
-   private void onDocumentEdited(final EditorContext editorCtx) {
-      if (editorCtx.equals(trackedEditorContext) && ToggleLivePreview.isLivePreviewEnabled()) {
+   private void onDocumentEdited(final TrackedEditorContext editorCtx) {
+      if (editorCtx == linkedEditorContext && ToggleLivePreview.isLivePreviewEnabled()) {
          render(editorCtx, false);
       }
    }
 
-   private void onDocumentSaved(final EditorContext editorCtx) {
-      if (editorCtx.equals(trackedEditorContext)) {
+   private void onDocumentSaved(final TrackedEditorContext editorCtx) {
+      if (editorCtx == linkedEditorContext) {
          render(editorCtx, false);
       }
    }
 
    void openEditor() {
-      final var trackedEditorContext = this.trackedEditorContext;
       final var page = UI.getActiveWorkbenchPage();
-      if (trackedEditorContext != null && page != null) {
-         page.activate(trackedEditorContext.editor);
+      if (page == null)
+         return;
+
+      final var linkedEditorContext = this.linkedEditorContext;
+      if (linkedEditorContext != null) {
+         linkedEditorContext.activateEditor();
       }
    }
 
-   private void render(final EditorContext editorCtx, final boolean forceCacheUpdate) {
+   private void render(final TrackedEditorContext editorCtx, final boolean forceCacheUpdate) {
       // if on UI thread offload rendering to background thread
       if (UI.isUIThread()) {
          CompletableFuture.runAsync(() -> render(editorCtx, forceCacheUpdate));
          return;
       }
 
-      final var source = ToggleLivePreview.isLivePreviewEnabled() && editorCtx.editor.isDirty() //
-            ? ContentSources.of(editorCtx.editor)
-            : ContentSources.of(editorCtx.file);
+      final var source = editorCtx.getSource();
 
       for (final var entry : renderers.entrySet()) {
          final var rendererExt = entry.getKey();
@@ -341,7 +294,7 @@ public final class PreviewComposite extends Composite {
       renderers.entrySet().stream() //
          .filter(e -> e.getValue() == stack.topControl) //
          .findFirst().ifPresent(e -> zoom.setValue(e.getKey().renderer.getZoom()));
-      return zoom.getValue();
+      return zoom.floatValue();
    }
 
    void setZoom(final float zoom) {
@@ -349,5 +302,4 @@ public final class PreviewComposite extends Composite {
          .filter(e -> e.getValue() == stack.topControl) //
          .findFirst().ifPresent(e -> e.getKey().renderer.setZoom(zoom));
    }
-
 }
