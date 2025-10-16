@@ -104,20 +104,21 @@
 
 
    <!-- ===================================== -->
-   <!-- View - Toolbar - Link To Editor       -->
+   <!-- View - Toolbar - Pin Preview          -->
    <!-- ===================================== -->
    <extension point="org.eclipse.ui.menus">
       <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
-         <command commandId="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
-            icon="src/main/resources/images/link_to_editor.png" style="toggle" />
+         <command commandId="de.sebthom.eclipse.previewer.command.TogglePinPreview"
+            icon="src/main/resources/images/pin_preview.png" style="toggle"
+            tooltip="Pin preview to current editor (no auto-switch on focus)." />
       </menuContribution>
    </extension>
    <extension point="org.eclipse.ui.commands">
-      <command id="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
-         defaultHandler="de.sebthom.eclipse.previewer.command.ToggleLinkToEditor"
-         name="Link with Editor">
+      <command id="de.sebthom.eclipse.previewer.command.TogglePinPreview"
+         defaultHandler="de.sebthom.eclipse.previewer.command.TogglePinPreview"
+         name="Pin Preview">
          <state id="org.eclipse.ui.commands.toggleState"
-            class="org.eclipse.ui.handlers.RegistryToggleState:true" />
+            class="org.eclipse.ui.handlers.RegistryToggleState:false" />
       </command>
    </extension>
 

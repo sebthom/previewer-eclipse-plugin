@@ -32,14 +32,16 @@ import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.IHandlerService;
 
 import de.sebthom.eclipse.commons.ui.Editors;
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
 import de.sebthom.eclipse.previewer.api.PreviewRenderer;
-import de.sebthom.eclipse.previewer.command.ToggleLinkToEditor;
 import de.sebthom.eclipse.previewer.command.ToggleLivePreview;
+import de.sebthom.eclipse.previewer.command.TogglePinPreview;
 import de.sebthom.eclipse.previewer.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
 import de.sebthom.eclipse.previewer.ui.editorsupport.CompareEditorSupport;
@@ -95,7 +97,7 @@ public final class PreviewComposite extends Composite {
                final TrackedEditorContext newEditorContext = support.createFrom(editorRef);
                if (newEditorContext != null) {
                   final var linkedEditorContext = PreviewComposite.this.linkedEditorContext;
-                  if (linkedEditorContext == null || ToggleLinkToEditor.isLinkToEditorEnabled()) {
+                  if (linkedEditorContext == null || !TogglePinPreview.isPinned()) {
                      linkToEditorContext(newEditorContext);
                   }
                   break;
@@ -114,6 +116,18 @@ public final class PreviewComposite extends Composite {
                linkedEditorContext.close();
                PreviewComposite.this.linkedEditorContext = null;
                showMessage(MARKDOWN_WELCOME);
+
+               // If the view was pinned to this editor, unpin by executing the toggle command
+               if (TogglePinPreview.isPinned()) {
+                  try {
+                     final IHandlerService handlerService = PlatformUI.getWorkbench().getService(IHandlerService.class);
+                     if (handlerService != null) {
+                        handlerService.executeCommand(TogglePinPreview.COMMAND_ID, null);
+                     }
+                  } catch (final Exception ignore) {
+                     // ignore and continue
+                  }
+               }
             }
          }
       }
@@ -166,7 +180,7 @@ public final class PreviewComposite extends Composite {
       editorSupports.add(new TextEditorSupport());
       editorSupports.add(new CompareEditorSupport());
 
-      // try to link to the currently active editor (if any) so the view renders immediately
+      // try to link to the currently active editor (if not pinned)
       linkToActiveEditor();
    }
 
@@ -209,6 +223,8 @@ public final class PreviewComposite extends Composite {
 
    @SuppressWarnings("resource")
    private void linkToActiveEditor() {
+      if (TogglePinPreview.isPinned())
+         return;
       final var activeEditor = Editors.getActiveEditor();
       if (activeEditor != null) {
          for (final IEditorReference editorRef : activeEditor.getSite().getPage().getEditorReferences()) {
@@ -224,6 +240,10 @@ public final class PreviewComposite extends Composite {
             }
          }
       }
+   }
+
+   public void linkToActiveEditorNow() {
+      linkToActiveEditor();
    }
 
    private void linkToEditorContext(final TrackedEditorContext newEditorContext) {

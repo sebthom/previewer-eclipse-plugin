@@ -15,13 +15,18 @@ import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.ui.PreviewView;
 
 /**
+ * Toggle pinning the Preview to the current editor (disables auto-switching on editor activation changes).
+ *
+ * When pinned, the Preview stays attached to the current editor and does not switch when you activate a different editor.
+ * Live Preview still applies to the pinned editor if enabled.
+ *
  * @author Sebatian Thomschke
  */
-public class ToggleLinkToEditor extends ToggleCommand {
+public class TogglePinPreview extends ToggleCommand {
 
-   public static final String COMMAND_ID = ToggleLinkToEditor.class.getName();
+   public static final String COMMAND_ID = TogglePinPreview.class.getName();
 
-   public static boolean isLinkToEditorEnabled() {
+   public static boolean isPinned() {
       return isEnabled(COMMAND_ID);
    }
 
@@ -31,7 +36,13 @@ public class ToggleLinkToEditor extends ToggleCommand {
 
       final PreviewView previewView = UI.findView(PreviewView.ID);
       if (previewView != null) {
-         previewView.openEditor();
+         if (isPinned()) {
+            // Pinned: keep current link; optionally focus the linked editor
+            previewView.openEditor();
+         } else {
+            // Unpinned: immediately follow the currently active editor
+            previewView.linkToActiveEditor();
+         }
       }
       return null;
    }

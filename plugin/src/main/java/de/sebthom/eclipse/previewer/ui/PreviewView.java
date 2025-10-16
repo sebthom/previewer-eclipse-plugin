@@ -39,6 +39,10 @@ public final class PreviewView extends ViewPart {
       content.openEditor();
    }
 
+   public void linkToActiveEditor() {
+      content.linkToActiveEditorNow();
+   }
+
    @Override
    public void setFocus() {
       content.setFocus();
