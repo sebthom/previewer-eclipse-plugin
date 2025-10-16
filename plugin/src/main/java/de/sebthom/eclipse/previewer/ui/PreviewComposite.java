@@ -33,6 +33,7 @@ import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISaveablePart;
 import org.eclipse.ui.IWorkbenchPartReference;
 
+import de.sebthom.eclipse.commons.ui.Editors;
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
@@ -90,19 +91,12 @@ public final class PreviewComposite extends Composite {
           */
          if (partRef instanceof final IEditorReference editorRef) {
             for (final var support : editorSupports) {
+               @SuppressWarnings("resource")
                final TrackedEditorContext newEditorContext = support.createFrom(editorRef);
                if (newEditorContext != null) {
                   final var linkedEditorContext = PreviewComposite.this.linkedEditorContext;
                   if (linkedEditorContext == null || ToggleLinkToEditor.isLinkToEditorEnabled()) {
-                     if (linkedEditorContext != null) {
-                        linkedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
-                        linkedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
-                        linkedEditorContext.close();
-                     }
-                     newEditorContext.editor.addPropertyListener(editorDirtyStateListener);
-                     newEditorContext.document.addDocumentListener(editorTextModifiedListener);
-                     PreviewComposite.this.linkedEditorContext = newEditorContext;
-                     render(newEditorContext, false);
+                     linkToEditorContext(newEditorContext);
                   }
                   break;
                }
@@ -171,6 +165,9 @@ public final class PreviewComposite extends Composite {
       // register editor supports in precedence order
       editorSupports.add(new TextEditorSupport());
       editorSupports.add(new CompareEditorSupport());
+
+      // try to link to the currently active editor (if any) so the view renders immediately
+      linkToActiveEditor();
    }
 
    @Override
@@ -199,6 +196,47 @@ public final class PreviewComposite extends Composite {
       if (linkedEditorContext != null) {
          render(linkedEditorContext, true);
       }
+   }
+
+   @SuppressWarnings("all")
+   float getZoom() {
+      final var zoom = new MutableFloat(1);
+      renderers.entrySet().stream() //
+         .filter(e -> e.getValue() == stack.topControl) //
+         .findFirst().ifPresent(e -> zoom.setValue(e.getKey().renderer.getZoom()));
+      return zoom.floatValue();
+   }
+
+   @SuppressWarnings("resource")
+   private void linkToActiveEditor() {
+      final var activeEditor = Editors.getActiveEditor();
+      if (activeEditor != null) {
+         for (final IEditorReference editorRef : activeEditor.getSite().getPage().getEditorReferences()) {
+            if (editorRef.getEditor(false) == activeEditor) {
+               for (final var support : editorSupports) {
+                  final TrackedEditorContext newEditorContext = support.createFrom(editorRef);
+                  if (newEditorContext != null) {
+                     linkToEditorContext(newEditorContext);
+                     return;
+                  }
+               }
+               return;
+            }
+         }
+      }
+   }
+
+   private void linkToEditorContext(final TrackedEditorContext newEditorContext) {
+      final var linkedEditorContext = this.linkedEditorContext;
+      if (linkedEditorContext != null) {
+         linkedEditorContext.document.removeDocumentListener(editorTextModifiedListener);
+         linkedEditorContext.editor.removePropertyListener(editorDirtyStateListener);
+         linkedEditorContext.close();
+      }
+      newEditorContext.editor.addPropertyListener(editorDirtyStateListener);
+      newEditorContext.document.addDocumentListener(editorTextModifiedListener);
+      this.linkedEditorContext = newEditorContext;
+      render(newEditorContext, false);
    }
 
    private void loadRenderersFromExtensionPoints() {
@@ -270,6 +308,12 @@ public final class PreviewComposite extends Composite {
       }
    }
 
+   void setZoom(final float zoom) {
+      renderers.entrySet().stream() //
+         .filter(e -> e.getValue() == stack.topControl) //
+         .findFirst().ifPresent(e -> e.getKey().renderer.setZoom(zoom));
+   }
+
    private void showMessage(final String markdown) {
       UI.run(() -> {
          if (!isDisposed()) {
@@ -286,20 +330,5 @@ public final class PreviewComposite extends Composite {
             layout();
          }
       });
-   }
-
-   @SuppressWarnings("all")
-   float getZoom() {
-      final var zoom = new MutableFloat(1);
-      renderers.entrySet().stream() //
-         .filter(e -> e.getValue() == stack.topControl) //
-         .findFirst().ifPresent(e -> zoom.setValue(e.getKey().renderer.getZoom()));
-      return zoom.floatValue();
-   }
-
-   void setZoom(final float zoom) {
-      renderers.entrySet().stream() //
-         .filter(e -> e.getValue() == stack.topControl) //
-         .findFirst().ifPresent(e -> e.getKey().renderer.setZoom(zoom));
    }
 }
