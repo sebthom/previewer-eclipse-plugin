@@ -31,7 +31,7 @@ import net.sf.jstuff.core.collection.tuple.Tuple2;
 /**
  * @author Sebastian Thomschke
  */
-public class BrowserWrapper implements IDisposable {
+public final class BrowserWrapper implements IDisposable {
 
    private final Browser browser;
 

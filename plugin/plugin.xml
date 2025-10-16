@@ -5,7 +5,7 @@
    <extension-point id="renderers" name="Preview Renderers" schema="schema/renderers.exsd" />
 
    <!-- ===================================== -->
-   <!-- View                                  -->
+   <!-- Preview View (ViewPart)               -->
    <!-- ===================================== -->
    <extension point="org.eclipse.ui.views">
       <category name="%PluginName" id="de.sebthom.eclipse.previewer.category" />
@@ -37,6 +37,17 @@
       </perspectiveExtension>
    </extension>
 
+   <!-- ===================================== -->
+   <!-- Preview Editor (EditorPart)           -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.editors">
+      <editor id="de.sebthom.eclipse.previewer.ui.PreviewEditor"
+         name="Preview Editor"
+         icon="src/main/resources/images/logo.png"
+         class="de.sebthom.eclipse.previewer.ui.PreviewEditor">
+         <contentTypeBinding contentTypeId="org.eclipse.core.runtime.text"/>
+      </editor>
+   </extension>
 
    <!-- ===================================== -->
    <!-- View - Toolbar - Zoom                 -->
