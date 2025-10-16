@@ -9,7 +9,7 @@ package de.sebthom.eclipse.previewer.command;
 import de.sebthom.eclipse.commons.command.ToggleCommand;
 
 /**
- * @author Sebatian Thomschke
+ * @author Sebastian Thomschke
  */
 public class ToggleLivePreview extends ToggleCommand {
 

@@ -15,7 +15,7 @@ import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.ui.PreviewView;
 
 /**
- * @author Sebatian Thomschke
+ * @author Sebastian Thomschke
  */
 public class ZoomOut extends AbstractHandler {
 

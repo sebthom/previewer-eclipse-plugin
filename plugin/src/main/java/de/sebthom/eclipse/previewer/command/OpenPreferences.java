@@ -16,7 +16,7 @@ import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.prefs.PluginPreferencePage;
 
 /**
- * @author Sebatian Thomschke
+ * @author Sebastian Thomschke
  */
 public class OpenPreferences extends AbstractHandler {
 

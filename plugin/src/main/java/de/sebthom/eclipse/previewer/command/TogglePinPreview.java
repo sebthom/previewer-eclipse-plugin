@@ -20,7 +20,7 @@ import de.sebthom.eclipse.previewer.ui.PreviewView;
  * When pinned, the Preview stays attached to the current editor and does not switch when you activate a different editor.
  * Live Preview still applies to the pinned editor if enabled.
  *
- * @author Sebatian Thomschke
+ * @author Sebastian Thomschke
  */
 public class TogglePinPreview extends ToggleCommand {
 
