@@ -65,6 +65,9 @@
          <command commandId="de.sebthom.eclipse.previewer.command.ZoomOut"
             icon="src/main/resources/images/zoomOut.png" style="push" />
       </menuContribution>
+      <menuContribution allPopups="false" locationURI="toolbar:de.sebthom.eclipse.previewer.ui.PreviewView">
+         <separator name="de.sebthom.eclipse.previewer.ui.PreviewView.zoomSeparator" visible="true" />
+      </menuContribution>
    </extension>
    <extension point="org.eclipse.ui.commands">
       <command id="de.sebthom.eclipse.previewer.command.ZoomIn"
