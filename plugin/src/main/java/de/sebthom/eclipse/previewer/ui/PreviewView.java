@@ -35,6 +35,7 @@ import de.sebthom.eclipse.previewer.command.ToggleLivePreview;
 import de.sebthom.eclipse.previewer.command.TogglePinPreview;
 import de.sebthom.eclipse.previewer.ui.editorsupport.CompareEditorSupport;
 import de.sebthom.eclipse.previewer.ui.editorsupport.EditorSupport;
+import de.sebthom.eclipse.previewer.ui.editorsupport.PreviewEditorSupport;
 import de.sebthom.eclipse.previewer.ui.editorsupport.TextEditorSupport;
 import de.sebthom.eclipse.previewer.ui.editorsupport.TrackedEditorContext;
 import net.sf.jstuff.core.event.ThrottlingEventDispatcher;
@@ -136,6 +137,7 @@ public final class PreviewView extends ViewPart {
       // register editor supports in precedence order
       editorSupports.add(new TextEditorSupport());
       editorSupports.add(new CompareEditorSupport());
+      editorSupports.add(new PreviewEditorSupport());
 
       // try to link to the currently active editor (if not pinned)
       linkToActiveEditor();
@@ -179,6 +181,7 @@ public final class PreviewView extends ViewPart {
       final var activeEditor = Editors.getActiveEditor();
       if (activeEditor == null)
          return;
+
       for (final IEditorReference editorRef : activeEditor.getSite().getPage().getEditorReferences()) {
          if (editorRef.getEditor(false) == activeEditor) {
             for (final var support : editorSupports) {
