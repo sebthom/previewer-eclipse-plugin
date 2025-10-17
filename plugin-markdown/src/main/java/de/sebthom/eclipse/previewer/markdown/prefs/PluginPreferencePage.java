@@ -44,6 +44,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          new BooleanFieldEditor(PluginPreferences.PREF_GITHUB_API_FALLBACK_TO_COMMONMARK,
             "Use CommonMark renderer when offline or GitHub Markdown API is unavailable", group)) //
       ));
+
+      addField(new BooleanFieldEditor(PluginPreferences.PREF_RENDER_MERMAID_DIAGRAMS, "Render Mermaid diagrams", parent));
    }
 
    public PluginPreferencePage() {

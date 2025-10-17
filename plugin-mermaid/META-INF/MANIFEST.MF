@@ -10,6 +10,7 @@ Bundle-Activator: de.sebthom.eclipse.previewer.mermaid.Plugin
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ClassPath: .
+Export-Package: de.sebthom.eclipse.previewer.mermaid;x-friends:="de.sebthom.eclipse.previewer.markdown"
 Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
  org.eclipse.core.filebuffers,
  org.eclipse.core.net,

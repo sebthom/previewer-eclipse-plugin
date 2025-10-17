@@ -33,6 +33,8 @@ public final class PluginPreferences {
          STORE.setDefault(PREF_GITHUB_API_MARKDOWN_MODE, "gfm");
          STORE.setDefault(PREF_GITHUB_API_FALLBACK_TO_COMMONMARK, true);
          STORE.setDefault(PREF_GITHUB_API_RESONSE_TIMEOUT, 5);
+
+         STORE.setDefault(PREF_RENDER_MERMAID_DIAGRAMS, true);
       }
    }
 
@@ -45,6 +47,8 @@ public final class PluginPreferences {
    public static final String PREF_GITHUB_API_MARKDOWN_MODE = "githubApiMarkdownMode";
    public static final String PREF_GITHUB_API_FALLBACK_TO_COMMONMARK = "githubApiFallbackToCommonmark";
    public static final String PREF_GITHUB_API_RESONSE_TIMEOUT = "githubApiResponseTimeout";
+
+   public static final String PREF_RENDER_MERMAID_DIAGRAMS = "renderMermaidDiagrams";
 
    public static void addListener(final IPropertyChangeListener listener) {
       STORE.addPropertyChangeListener(listener);
@@ -88,6 +92,10 @@ public final class PluginPreferences {
 
    public static String getGithubApiToken() {
       return STORE.getString(PREF_GITHUB_API_TOKEN);
+   }
+
+   public static boolean isRenderMermaidDiagrams() {
+      return STORE.getBoolean(PREF_RENDER_MERMAID_DIAGRAMS);
    }
 
    private PluginPreferences() {
