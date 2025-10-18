@@ -114,7 +114,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
       final var useDarkTheme = MiscUtils.isDarkEclipseTheme();
-      out.append("<!DOCTYPE html>");
+      out.append("<!DOCTYPE html>"); // https://github.com/sindresorhus/github-markdown-css#troubleshooting
       out.append("<html>");
       out.append("<head>");
       out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
