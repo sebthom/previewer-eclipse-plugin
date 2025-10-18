@@ -69,6 +69,9 @@ public final class StringUtils {
            font-size: 0.8em;
            font-family: Tahoma, sans-serif;
          }
+         #previewer_infobox * {
+           color: #000000;
+         }
          #previewer_infobox.minimized {
            width: 10px;
          }

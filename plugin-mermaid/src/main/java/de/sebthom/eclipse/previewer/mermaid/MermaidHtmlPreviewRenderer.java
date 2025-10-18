@@ -26,6 +26,23 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    private File mermaidJS;
 
+   private static final String MERMAID_INIT_SCRIPT = """
+      <script>
+        try {
+          mermaid.initialize({ startOnLoad: false, theme: '$$THEME$$' });
+          mermaid.run({ querySelector: '#mermaid', }).then(() => {
+            const svg = document.querySelector("#mermaid svg");
+            const placeholder = document.getElementById("placeholder");
+            const parent = placeholder.parentNode;
+            parent.appendChild(svg);
+            parent.removeChild(placeholder);
+          });
+        } catch(err) {
+          alert(err);
+        }
+      </script>
+      """;
+
    public MermaidHtmlPreviewRenderer() throws IOException {
       mermaidJS = Plugin.resources().extract(Constants.MERMAID_JS);
    }
@@ -45,6 +62,10 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
          </head>
          <body>
          """);
+
+      if (MiscUtils.isDarkEclipseTheme()) {
+         out.append("<style>html, body { background: #585858; color: #fff; }</style>");
+      }
 
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
@@ -71,23 +92,8 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
          <pre id="mermaid" style="width:100%">
            """ + Strings.replace(source.contentAsString(), "<", "&lt;") + """
          </pre>
-         <script>
-           try {
-             mermaid.initialize({ startOnLoad: false });
-             mermaid.run({
-               querySelector: '#mermaid',
-             }).then(() => {
-               const svg = document.querySelector("#mermaid svg");
-               const placeholder = document.getElementById("placeholder");
-               const parent = placeholder.parentNode;
-               parent.appendChild(svg);
-               parent.removeChild(placeholder);
-             });
-           } catch(err) {
-             alert(err);
-           }
-         </script>
          """);
+      out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", MiscUtils.isDarkEclipseTheme() ? "dark" : "default"));
       out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }

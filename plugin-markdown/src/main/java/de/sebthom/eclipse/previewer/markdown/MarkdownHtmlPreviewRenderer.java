@@ -15,7 +15,6 @@ import java.net.ConnectException;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
-import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.markdown.prefs.PluginPreferences;
@@ -23,21 +22,51 @@ import de.sebthom.eclipse.previewer.markdown.renderer.CommonMarkRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.GitHubMarkdownRenderer;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
-import net.sf.jstuff.core.graphic.RGB;
 
 /**
  * @author Sebastian Thomschke
  */
 public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
-   private static boolean isDarkEclipseTheme() {
-      final var bgColor = UI.run(() -> UI.getShell().getBackground());
-      return new RGB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()).getBrightnessFast() < 128;
-   }
-
    private File cssDark;
    private File cssLight;
    private File mermaidJS;
+
+   private static final String MERMAID_INIT_SCRIPT = """
+      <script>
+      (function(){
+        try {
+          // Collect potential mermaid blocks from both CommonMark and GitHub API output
+          const targets = new Set();
+          document.querySelectorAll('pre > code.language-mermaid, pre.language-mermaid > code, code.language-mermaid, pre.language-mermaid')
+            .forEach(n => targets.add(n.closest('pre') || n));
+          document.querySelectorAll("[class*='source-mermaid']")
+            .forEach(n => targets.add(n.closest('div.highlight, figure.highlight, pre') || n));
+
+          targets.forEach(function(container){
+            const pre = container.matches('pre')
+                          ? container
+                          : (container.querySelector && container.querySelector('pre')) || container.closest('pre') || container;
+            const txt = (pre && pre.textContent ? pre.textContent : container.textContent || '').toString();
+            const div = document.createElement('div');
+            div.className = 'mermaid';
+            div.textContent = txt.trim();
+            container.parentNode.insertBefore(div, container);
+            container.parentNode.removeChild(container);
+          });
+
+          if (document.querySelector('.mermaid')) {
+              mermaid.initialize({ startOnLoad: false, theme: '$$THEME$$' });
+              mermaid.run({ querySelector: '.mermaid' }).catch(function(err) {
+                 if (typeof console !== 'undefined' && console.error) console.error(err);
+              });
+             }
+           } catch (e) {
+             if (typeof console !== 'undefined' && console.error) console.error(e);
+           }
+         })();
+         </script>
+         """;
 
    public MarkdownHtmlPreviewRenderer() throws IOException {
       cssDark = Plugin.resources().extract(Constants.MARKDOWN_CSS_DARK);
@@ -84,11 +113,12 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
       final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
 
+      final var useDarkTheme = MiscUtils.isDarkEclipseTheme();
       out.append("<!DOCTYPE html>");
       out.append("<html>");
       out.append("<head>");
       out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
-      out.append("<link rel='stylesheet' href='" + (isDarkEclipseTheme() ? cssDark : cssLight).toURI() + "'>");
+      out.append("<link rel='stylesheet' href='" + (useDarkTheme ? cssDark : cssLight).toURI() + "'>");
       out.append("<style>* { tab-size: " + getPreferredTabSize() + " !important}</style>");
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append("<script src='" + mermaidJS.toURI() + "'></script>");
@@ -97,44 +127,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append("<body class='markdown-body' style='padding:5px'>\n\n");
       out.append(htmlBody);
       if (PluginPreferences.isRenderMermaidDiagrams()) {
-         out.append(
-            """
-               <script>
-               (function(){
-                 try {
-                   if (!window.mermaid) return;
-
-                   // Collect potential mermaid blocks from both CommonMark and GitHub API output
-                   const targets = new Set();
-                   document.querySelectorAll('pre > code.language-mermaid, pre.language-mermaid > code, code.language-mermaid, pre.language-mermaid')
-                     .forEach(n => targets.add(n.closest('pre') || n));
-                   document.querySelectorAll("[class*='source-mermaid']")
-                     .forEach(n => targets.add(n.closest('div.highlight, figure.highlight, pre') || n));
-
-                   targets.forEach(function(container){
-                     const pre = container.matches('pre')
-                                   ? container
-                                   : (container.querySelector && container.querySelector('pre')) || container.closest('pre') || container;
-                     const txt = (pre && pre.textContent ? pre.textContent : container.textContent || '').toString();
-                     const div = document.createElement('div');
-                     div.className = 'mermaid';
-                     div.textContent = txt.trim();
-                     container.parentNode.insertBefore(div, container);
-                     container.parentNode.removeChild(container);
-                   });
-
-                   if (document.querySelector('.mermaid')) {
-                     mermaid.initialize({ startOnLoad: false });
-                     mermaid.run({ querySelector: '.mermaid' }).catch(function(err) {
-                       if (typeof console !== 'undefined' && console.error) console.error(err);
-                     });
-                   }
-                 } catch (e) {
-                   if (typeof console !== 'undefined' && console.error) console.error(e);
-                 }
-               })();
-               </script>
-               """);
+         out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", useDarkTheme ? "dark" : "default"));
       }
       out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");

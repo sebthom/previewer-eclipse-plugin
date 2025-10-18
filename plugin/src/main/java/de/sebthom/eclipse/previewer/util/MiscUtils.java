@@ -18,6 +18,8 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 
 import de.sebthom.eclipse.commons.ui.Colors;
+import de.sebthom.eclipse.commons.ui.UI;
+import net.sf.jstuff.core.graphic.RGB;
 
 /**
  * @author Sebastian Thomschke
@@ -26,6 +28,11 @@ public final class MiscUtils {
 
    public static String getCurrentTime() {
       return LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+   }
+
+   public static boolean isDarkEclipseTheme() {
+      final var bgColor = UI.run(() -> UI.getShell().getBackground());
+      return new RGB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()).getBrightnessFast() < 128;
    }
 
    /**
