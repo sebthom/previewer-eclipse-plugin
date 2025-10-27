@@ -46,6 +46,7 @@
       <module>plugin-markdown</module>
       <module>plugin-mermaid</module>
       <module>plugin-plantuml</module>
+      <module>plugin-textmate</module>
       <module>feature</module>
       <module>updatesite</module>
    </modules>
