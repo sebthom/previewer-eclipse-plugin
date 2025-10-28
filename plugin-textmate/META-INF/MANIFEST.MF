@@ -10,21 +10,16 @@ Bundle-Activator: de.sebthom.eclipse.previewer.textmate.Plugin
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ClassPath: .
-Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
- org.eclipse.core.filebuffers,
- org.eclipse.core.net,
- org.eclipse.core.resources,
+Require-Bundle: org.eclipse.platform;bundle-version="4.29.0",
  org.eclipse.core.runtime,
- org.eclipse.osgi,
+ org.eclipse.jface,
  org.eclipse.jface.text,
- org.eclipse.ui,
+ org.eclipse.osgi,
  org.eclipse.ui.ide,
  org.eclipse.ui.workbench.texteditor,
- org.eclipse.tm4e.ui;bundle-version="0.15.0",
  org.eclipse.tm4e.core;bundle-version="0.15.0",
  org.eclipse.tm4e.registry;bundle-version="0.15.0",
- org.apache.commons.commons-io;bundle-version="[2.20.0,3.0.0)",
- org.apache.commons.lang3;bundle-version="[3.19.0,4.0.0)",
- net.sf.jstuff.core;bundle-version="[8.2.0,9.0.0)",
+ org.eclipse.tm4e.ui;bundle-version="0.15.0",
  de.sebthom.eclipse.commons;bundle-version="[1.0.0.20251018-1720,2.0.0)",
- de.sebthom.eclipse.previewer;bundle-version="[1.0.0,2.0.0)"
+ de.sebthom.eclipse.previewer;bundle-version="[1.0.0,2.0.0)",
+ net.sf.jstuff.core;bundle-version="8.2.0"

@@ -27,20 +27,8 @@
    </license>
 
    <url>
-      <update label="Previewer - Latest" url="https://raw.githubusercontent.com/sebthom/previewer-eclipse-plugin/updatesite/"/>
+      <update label="Previewer (latest)" url="https://raw.githubusercontent.com/sebthom/previewer-eclipse-plugin/updatesite/"/>
    </url>
-
-   <requires>
-      <import plugin="org.eclipse.platform" version="4.25.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.apache.commons.lang3" version="3.17.0" match="greaterOrEqual"/>
-      <import plugin="de.sebthom.eclipse.commons" version="1.0.0.20250222-0150" match="greaterOrEqual"/>
-      <import plugin="net.sf.jstuff.core" version="8.1.0" match="compatible"/>
-   </requires>
 
    <plugin
          id="de.sebthom.eclipse.previewer"
@@ -124,6 +112,10 @@
 
    <plugin
          id="net.sourceforge.plantuml.plantuml-mit"
+         version="0.0.0"/>
+
+   <plugin
+         id="de.sebthom.eclipse.previewer.textmate"
          version="0.0.0"/>
 
 </feature>

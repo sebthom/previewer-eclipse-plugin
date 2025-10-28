@@ -11,18 +11,13 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ClassPath: .
 Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
- org.eclipse.core.filebuffers,
  org.eclipse.core.net,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
- org.eclipse.jface.text,
  org.eclipse.ui,
  org.eclipse.ui.editors,
- org.eclipse.ui.ide,
- org.eclipse.ui.workbench.texteditor,
  org.apache.commons.commons-io;bundle-version="[2.20.0,3.0.0)",
- org.apache.commons.lang3;bundle-version="[3.19.0,4.0.0)",
  net.sf.jstuff.core;bundle-version="[8.2.0,9.0.0)",
  de.sebthom.eclipse.commons;bundle-version="[1.0.0.20251018-1720,2.0.0)",
  de.sebthom.eclipse.previewer;bundle-version="[1.0.0,2.0.0)",
@@ -38,4 +33,3 @@ Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
  org.commonmark.ext-ins;bundle-version="[0.27.0,1.0.0)",
  org.commonmark.ext-task-list-items;bundle-version="[0.27.0,1.0.0)",
  org.commonmark.ext-yaml-front-matter;bundle-version="[0.27.0,1.0.0)"
-
