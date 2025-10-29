@@ -44,6 +44,10 @@ which provide syntax highlighting for the supported source files.
 
   ![](src/site/img/screen_graphviz.png)
 
+- TextMate Grammar example:
+
+  ![](src/site/img/screen_textmate.png)
+
 
 ## <a name="installation"></a>Installation
 
