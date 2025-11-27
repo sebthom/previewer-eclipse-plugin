@@ -52,7 +52,7 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    public boolean setContent(final String content) {
-      return UI.run(() -> {
+      return UI.supply(() -> {
          if (browser.isDisposed())
             return false;
 
@@ -78,7 +78,7 @@ public final class BrowserWrapper implements IDisposable {
    private ProgressListener onPageLoaded = new ProgressAdapter() {};
 
    public CompletionStage<@Nullable Void> navigateTo(final String url) {
-      return UI.run(() -> {
+      return UI.supply(() -> {
          if (browser.isDisposed())
             return CompletableFuture.failedStage(new IllegalStateException("Browser is already disposed"));
 
@@ -103,11 +103,11 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    public String getUrl() {
-      return UI.run(() -> browser.isDisposed() ? "" : browser.getUrl());
+      return UI.supply(() -> browser.isDisposed() ? "" : browser.getUrl());
    }
 
    public Tuple2<Integer, Integer> getScrollPos() {
-      return UI.run(() -> {
+      return UI.supply(() -> {
          try {
             if (browser.evaluate("""
                   return window.pageXOffset || (document.documentElement
@@ -129,7 +129,7 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    public float getZoom() {
-      return UI.run(() -> {
+      return UI.supply(() -> {
          if (browser.evaluate("""
             const transform = document.body.style.transform;
             if (transform) return 1;

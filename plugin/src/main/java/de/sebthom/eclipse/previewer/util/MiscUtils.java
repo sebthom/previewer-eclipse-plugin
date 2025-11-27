@@ -31,7 +31,7 @@ public final class MiscUtils {
    }
 
    public static boolean isDarkEclipseTheme() {
-      final var bgColor = UI.run(() -> UI.getShell().getBackground());
+      final var bgColor = UI.supply(() -> UI.getShell().getBackground());
       return new RGB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()).getBrightnessFast() < 128;
    }
 
