@@ -20,6 +20,9 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.services.IDisposable;
 
@@ -34,6 +37,7 @@ import net.sf.jstuff.core.collection.tuple.Tuple2;
 public final class BrowserWrapper implements IDisposable {
 
    private final Browser browser;
+   private final Clipboard clipboard;
 
    public BrowserWrapper(final Composite parent) {
       // for SWT.EDGE, see https://github.com/eclipse-platform/eclipse.platform.swt/blob/master/bundles/org.eclipse.swt/Readme.WebView2.md#limitation-and-caveats
@@ -49,6 +53,49 @@ public final class BrowserWrapper implements IDisposable {
          browser = new Browser(parent, SWT.NONE);
       }
       this.browser = browser;
+      clipboard = new Clipboard(parent.getDisplay());
+
+      // Workaround for Eclipse keybinding handling: Ctrl+C often triggers the workbench Copy command,
+      // which does not propagate the embedded web selection to the system clipboard.
+      // Copy the current web selection ourselves when the Browser has focus.
+      browser.addListener(SWT.KeyDown, event -> {
+         if (this.browser.isDisposed())
+            return;
+
+         final boolean mod1 = (event.stateMask & SWT.MOD1) != 0;
+         if (!mod1)
+            return;
+
+         // SWT uses ASCII key codes for letters in KeyDown events.
+         if (event.keyCode != 'c' && event.keyCode != 'C')
+            return;
+
+         final String selection = getSelectedText();
+         if (selection.isEmpty())
+            return;
+
+         clipboard.setContents(new Object[] {selection}, new Transfer[] {TextTransfer.getInstance()});
+         event.doit = false;
+      });
+   }
+
+   private String getSelectedText() {
+      if (browser.isDisposed())
+         return "";
+
+      try {
+         final Object result = browser.evaluate("""
+            try {
+              return (window.getSelection && window.getSelection().toString()) || "";
+            } catch (e) {
+              return "";
+            }
+            """);
+         return result instanceof final String s ? s : "";
+      } catch (final SWTException ex) {
+         Plugin.log().warn(ex, "Cannot read browser selection.");
+         return "";
+      }
    }
 
    public boolean setContent(final String content) {
@@ -148,6 +195,7 @@ public final class BrowserWrapper implements IDisposable {
 
    @Override
    public void dispose() {
+      clipboard.dispose();
       browser.dispose();
    }
 }
