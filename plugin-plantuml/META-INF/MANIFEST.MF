@@ -18,4 +18,4 @@ Require-Bundle: org.eclipse.platform;bundle-version="4.25.0",
  net.sf.jstuff.core;bundle-version="[8.2.0,9.0.0)",
  de.sebthom.eclipse.commons;bundle-version="[1.0.0.20251127-1946,2.0.0)",
  de.sebthom.eclipse.previewer;bundle-version="[1.0.0,2.0.0)",
- net.sourceforge.plantuml.plantuml-mit;bundle-version="[1.2025.10,2.0.0)"
+ net.sourceforge.plantuml.plantuml-mit;bundle-version="[1.2026.1,2.0.0)"

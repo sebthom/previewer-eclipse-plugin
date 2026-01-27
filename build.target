@@ -36,7 +36,7 @@
             <dependency>
                <groupId>net.sourceforge.plantuml</groupId>
                <artifactId>plantuml-mit</artifactId>
-               <version>1.2025.10</version>
+               <version>1.2026.1</version>
                <type>jar</type>
             </dependency>
          </dependencies>
@@ -56,7 +56,7 @@ DynamicImport-Package: *
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
          </dependencies>
@@ -76,55 +76,55 @@ DynamicImport-Package: *
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-autolink</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-footnotes</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-gfm-strikethrough</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
               <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-gfm-tables</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-heading-anchor</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-image-attributes</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-ins</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-task-list-items</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-yaml-front-matter</artifactId>
-               <version>0.27.0</version>
+               <version>0.27.1</version>
                <type>jar</type>
             </dependency>
          </dependencies>
