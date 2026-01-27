@@ -21,19 +21,19 @@
          <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
             ratio="0.3"
             relative="org.eclipse.ui.views.ProblemView"
-            relationship="bottom" />
+            relationship="stack" />
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
             ratio="0.3"
             relative="org.eclipse.ui.views.ProblemView"
-            relationship="bottom" />
+            relationship="stack" />
       </perspectiveExtension>
       <perspectiveExtension targetID="org.eclipse.team.ui.TeamSynchronizingPerspective">
          <view id="de.sebthom.eclipse.previewer.ui.PreviewView"
             ratio="0.3"
             relative="org.eclipse.ui.views.ProblemView"
-            relationship="bottom" />
+            relationship="stack" />
       </perspectiveExtension>
    </extension>
 
