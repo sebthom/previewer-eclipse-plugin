@@ -36,22 +36,39 @@ import net.sf.jstuff.core.collection.tuple.Tuple2;
  */
 public final class BrowserWrapper implements IDisposable {
 
+   private static Browser createBrowser(final Composite parent) {
+      if (!SystemUtils.IS_OS_WINDOWS)
+         return new Browser(parent, SWT.NONE);
+
+      final int style = switch (PluginPreferences.getWebView()) {
+         case "edge" -> SWT.EDGE;
+         // The stored value is "default" for historical reasons. On old SWT releases, SWT.NONE was IE on Windows;
+         // on newer releases, request SWT.IE reflectively to keep that preference stable.
+         case "default" -> getInternetExplorerBrowserStyle();
+         default -> SWT.NONE;
+      };
+
+      try {
+         return new Browser(parent, style);
+      } catch (final SWTException ex) {
+         Plugin.log().error(ex);
+         return new Browser(parent, SWT.NONE);
+      }
+   }
+
+   private static int getInternetExplorerBrowserStyle() {
+      try {
+         return SWT.class.getField("IE").getInt(null);
+      } catch (final NoSuchFieldException | IllegalAccessException | IllegalArgumentException | SecurityException ex) {
+         return SWT.NONE;
+      }
+   }
+
    private final Browser browser;
    private final Clipboard clipboard;
 
    public BrowserWrapper(final Composite parent) {
-      // for SWT.EDGE, see https://github.com/eclipse-platform/eclipse.platform.swt/blob/master/bundles/org.eclipse.swt/Readme.WebView2.md#limitation-and-caveats
-      Browser browser;
-      if (SystemUtils.IS_OS_WINDOWS && "edge".equals(PluginPreferences.getWebView())) {
-         try {
-            browser = new Browser(parent, SWT.EDGE);
-         } catch (final SWTException ex) {
-            Plugin.log().error(ex);
-            browser = new Browser(parent, SWT.NONE);
-         }
-      } else {
-         browser = new Browser(parent, SWT.NONE);
-      }
+      final var browser = createBrowser(parent);
       this.browser = browser;
       clipboard = new Clipboard(parent.getDisplay());
 
