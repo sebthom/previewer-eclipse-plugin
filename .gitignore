@@ -1,13 +1,11 @@
-# Local work folder that is not checked in
-_LOCAL/
+# Local work folders that is not checked in
+_*/
+
+.*
+!.editorconfig
+!.git*
 
 # Eclipse
-.apt_generated/
-.checkstyle
-.classpath
-.factorypath
-.project
-**/.settings/*
 !**/.settings/org.eclipse.jdt.core.prefs
 bin/
 
@@ -30,12 +28,6 @@ buildNumber.properties
 
 # NetBeans
 nb-configuration.xml
-
-# Visual Studio Code
-/.vscode
-
-# OSX
-.DS_Store
 
 # Vim
 *.swo
