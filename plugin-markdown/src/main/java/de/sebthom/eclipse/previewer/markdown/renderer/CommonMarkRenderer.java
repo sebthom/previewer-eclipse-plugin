@@ -12,6 +12,7 @@ import java.util.List;
 import org.commonmark.ext.autolink.AutolinkExtension;
 import org.commonmark.ext.footnotes.FootnotesExtension;
 import org.commonmark.ext.front.matter.YamlFrontMatterExtension;
+import org.commonmark.ext.gfm.alerts.AlertsExtension;
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
@@ -36,6 +37,7 @@ public class CommonMarkRenderer implements MarkdownRenderer {
    @SuppressWarnings("null")
    protected CommonMarkRenderer() {
       final var extensions = List.of( //
+         AlertsExtension.create(), //
          AutolinkExtension.create(), //
          FootnotesExtension.create(), //
          HeadingAnchorExtension.create(), //
