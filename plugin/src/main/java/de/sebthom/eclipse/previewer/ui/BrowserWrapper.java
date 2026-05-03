@@ -11,12 +11,15 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
@@ -29,6 +32,7 @@ import org.eclipse.ui.services.IDisposable;
 import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Plugin;
 import de.sebthom.eclipse.previewer.prefs.PluginPreferences;
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 import net.sf.jstuff.core.collection.tuple.Tuple2;
 
 /**
@@ -66,6 +70,7 @@ public final class BrowserWrapper implements IDisposable {
 
    private final Browser browser;
    private final Clipboard clipboard;
+   private @Nullable Predicate<URI> shouldOverrideNavigation;
 
    public BrowserWrapper(final Composite parent) {
       final var browser = createBrowser(parent);
@@ -80,11 +85,8 @@ public final class BrowserWrapper implements IDisposable {
             return;
 
          final boolean mod1 = (event.stateMask & SWT.MOD1) != 0;
-         if (!mod1)
-            return;
-
          // SWT uses ASCII key codes for letters in KeyDown events.
-         if (event.keyCode != 'c' && event.keyCode != 'C')
+         if (!mod1 || event.keyCode != 'c' && event.keyCode != 'C')
             return;
 
          final String selection = getSelectedText();
@@ -94,6 +96,35 @@ public final class BrowserWrapper implements IDisposable {
          clipboard.setContents(new Object[] {selection}, new Transfer[] {TextTransfer.getInstance()});
          event.doit = false;
       });
+
+      browser.addLocationListener(new LocationAdapter() {
+         @Override
+         public void changing(final LocationEvent event) {
+            final URI target = MiscUtils.toURI(event.location);
+            if (target == null)
+               return;
+
+            final var shouldOverrideNavigation = BrowserWrapper.this.shouldOverrideNavigation;
+            try {
+               if (shouldOverrideNavigation != null && shouldOverrideNavigation.test(target)) {
+                  event.doit = false;
+               }
+            } catch (final RuntimeException ex) {
+               Plugin.log().warn(ex, "Cannot handle browser navigation to [" + target + "].");
+            }
+         }
+      });
+   }
+
+   /**
+    * Sets a callback that can override user-initiated browser navigation before the embedded browser follows the target
+    * URI.
+    * <p>
+    * Return {@code true} when the target was handled elsewhere and the embedded browser should cancel its native
+    * navigation. Return {@code false} to let the browser continue normally.
+    */
+   public void setShouldOverrideNavigation(final @Nullable Predicate<URI> shouldOverrideNavigation) {
+      this.shouldOverrideNavigation = shouldOverrideNavigation;
    }
 
    private String getSelectedText() {

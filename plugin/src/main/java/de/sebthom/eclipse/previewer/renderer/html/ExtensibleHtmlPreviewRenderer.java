@@ -9,10 +9,14 @@ package de.sebthom.eclipse.previewer.renderer.html;
 import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,10 +43,22 @@ import net.sf.jstuff.core.functional.ThrowingFunction;
  */
 public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
+   @FunctionalInterface
+   public interface LocalFileLinkHandler {
+      /**
+       * @param path existing local file path resolved from the clicked browser link
+       * @param target file URI for {@code path}, with any URI fragment removed
+       * @return true if the target was handled and browser navigation should be cancelled
+       */
+      boolean openLocalFileLink(Path path, URI target);
+   }
+
    private static final class PageState {
       Tuple2<Integer, Integer> scrollPos = Tuple2.create(0, 0);
       float zoomLevel = 1.0f;
    }
+
+   private static final Path RENDER_CACHE_ROOT = SystemUtils.getJavaIoTmpDir().toPath().resolve(Plugin.PLUGIN_ID);
 
    private LRUMap<String, PageState> pageStates = new LRUMap<>(500);
    private @Nullable String currentPageStateKey;
@@ -55,6 +71,8 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    private PreviewRendererExtension<HtmlPreviewRenderer> passthroughXmlRenderer = lateNonNull();
 
    private BrowserWrapper browser = lateNonNull();
+   private @Nullable LocalFileLinkHandler localFileLinkHandler;
+   private @Nullable Path currentRenderedContentPath;
 
    private void loadRenderersFromExtensionPoints() {
       for (final IConfigurationElement ce : Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS)) {
@@ -73,13 +91,96 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
       passthroughXmlRenderer = renderers.stream().filter(r -> r.renderer instanceof XmlPreviewRenderer).findFirst().get();
       renderers.remove(passthroughXmlRenderer);
-
    }
 
    @Override
    public void init(final Composite parent) {
       browser = new BrowserWrapper(parent);
+      browser.setShouldOverrideNavigation(this::tryOpenLocalFileLink);
       loadRenderersFromExtensionPoints();
+   }
+
+   private boolean tryOpenLocalFileLink(final URI target) {
+      final Path path = toRegularFilePath(target);
+      if (path == null)
+         return false;
+
+      final boolean internalNavigation = isInternalNavigation(path);
+      final boolean sameDocumentNavigation = isSameDocumentNavigation(target, path);
+      if (internalNavigation || sameDocumentNavigation || isRenderCachePath(path))
+         return false;
+
+      final URI targetWithoutFragment = path.toUri();
+      final var handler = localFileLinkHandler;
+      return handler != null && handler.openLocalFileLink(path, targetWithoutFragment);
+   }
+
+   private boolean isInternalNavigation(final Path target) {
+      final var currentRenderedContentPath = this.currentRenderedContentPath;
+      if (currentRenderedContentPath == null)
+         return false;
+
+      // SWT/WebView can report more than one navigation event for the generated preview page. Keep treating the current
+      // rendered output as an internal page load so it is never opened as a linked file editor.
+      return currentRenderedContentPath.equals(target);
+   }
+
+   private static @Nullable Path toRegularFilePath(final URI target) {
+      if (!"file".equalsIgnoreCase(target.getScheme()))
+         return null;
+
+      try {
+         final Path path = Path.of(MiscUtils.withoutFragment(target));
+         if (!Files.isRegularFile(path))
+            return null;
+         return toCanonicalPath(path);
+      } catch (final RuntimeException ex) {
+         return null;
+      }
+   }
+
+   private static boolean isRenderCachePath(final Path path) {
+      return path.startsWith(toCanonicalPath(RENDER_CACHE_ROOT));
+   }
+
+   private static Path toCanonicalPath(final Path path) {
+      final Path absolutePath = path.toAbsolutePath().normalize();
+      try {
+         return absolutePath.toRealPath();
+      } catch (final IOException ex) {
+         return absolutePath;
+      }
+   }
+
+   private static boolean isSameDocument(final URI left, final URI right) {
+      final String leftScheme = left.getScheme();
+      final String rightScheme = right.getScheme();
+      return (leftScheme == null ? rightScheme == null : leftScheme.equalsIgnoreCase(rightScheme)) //
+            && Objects.equals(left.getRawSchemeSpecificPart(), right.getRawSchemeSpecificPart());
+   }
+
+   private boolean isSameDocumentNavigation(final URI target, final Path targetPath) {
+      final URI current = MiscUtils.toURI(browser.getUrl());
+      if (current == null)
+         return false;
+
+      final Path currentPath = toRegularFilePath(current);
+      if (currentPath != null)
+         return currentPath.equals(targetPath);
+
+      return isSameDocument(current, target);
+   }
+
+   /**
+    * Sets the handler used when a clicked link in rendered HTML resolves to an existing local file.
+    * <p>
+    * This renderer handles the browser-specific work first: internal preview page loads and same-document anchors are
+    * ignored, then this class accepts only {@code file:} links, strips URI fragments, converts the target to a
+    * {@link Path}, and verifies that it is a regular file. The handler only decides what Eclipse should do with that
+    * resolved local file.
+    */
+   public void setLocalFileLinkHandler(final @Nullable LocalFileLinkHandler localFileLinkHandler) {
+      this.localFileLinkHandler = localFileLinkHandler;
    }
 
    @Override
@@ -119,6 +220,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
       pageStateKey = currentPageStateKey = source.path().toString();
       final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
+      currentRenderedContentPath = toCanonicalPath(renderedContentPath);
       browser.navigateTo(renderedContentPath).thenRun(() -> {
          if (pageState.zoomLevel != 1.0f) {
             browser.setZoom(pageState.zoomLevel);
@@ -214,7 +316,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    }
 
    public boolean supports(final ContentSource source) {
-      return passthroughHtmlRenderer.supports(source) || renderers.stream() //
+      return passthroughHtmlRenderer.supports(source) || passthroughXmlRenderer.supports(source) || renderers.stream() //
          .anyMatch(renderer -> renderer.supports(source));
    }
 }

@@ -6,12 +6,15 @@
  */
 package de.sebthom.eclipse.previewer.util;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -97,6 +100,27 @@ public final class MiscUtils {
       styledText.setText(plainText.toString());
       for (final StyleRange styleRange : styleRanges) {
          styledText.setStyleRange(styleRange);
+      }
+   }
+
+   public static @Nullable URI toURI(final @Nullable String url) {
+      if (url == null || url.isBlank())
+         return null;
+      try {
+         return new URI(url);
+      } catch (final IllegalArgumentException | URISyntaxException ex) {
+         return null;
+      }
+   }
+
+   public static URI withoutFragment(final URI target) {
+      if (target.getRawFragment() == null)
+         return target;
+      try {
+         return new URI(target.getScheme(), target.getUserInfo(), target.getHost(), target.getPort(), target.getPath(), target.getQuery(),
+            null);
+      } catch (final URISyntaxException ex) {
+         return target;
       }
    }
 

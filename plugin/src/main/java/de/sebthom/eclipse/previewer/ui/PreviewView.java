@@ -129,7 +129,7 @@ public final class PreviewView extends ViewPart {
       partService.addPartListener(partListener);
 
       parent.setLayout(new FillLayout());
-      renderPane = new PreviewComposite(parent, SWT.NONE);
+      renderPane = PreviewComposite.forPreviewView(parent, SWT.NONE);
       renderPane.showMessage("Open a **supported** file in a text or compare editor to see a rendered preview here.");
 
       editorTextModifiedEventDispatcher.subscribe(this::onDocumentEdited);

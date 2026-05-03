@@ -121,7 +121,7 @@ public final class PreviewEditor extends EditorPart {
       Buttons.onSelected(settings, () -> PreferencesUtil.createPreferenceDialogOn(getSite().getShell(),
          de.sebthom.eclipse.previewer.prefs.PluginPreferencePage.class.getName(), null, null).open());
 
-      renderPane = new PreviewComposite(root, SWT.NONE);
+      renderPane = PreviewComposite.forPreviewEditor(root, SWT.NONE);
       renderPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
       renderPane.showMessage("Rendering preview...");
 
