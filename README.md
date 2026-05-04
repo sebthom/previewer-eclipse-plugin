@@ -23,14 +23,19 @@ opened in text editors.
 
 The following formats are supported out of the box:
 - [Draw.io](https://www.drawio.com/) diagrams
-- [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/)
-- GraphViz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
+- [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/), including fenced blocks for:
+    - Mermaid: `mermaid`
+    - PlantUML: `plantuml`, `puml`, `iuml`, `pu`
+    - Graphviz DOT: `dot`, `graphviz`
+- Graphviz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
 - [Mermaid](https://mermaid.js.org/) diagrams
 - [PlantUML](https://plantuml.com/) diagrams
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
 - Terrastruct [D2](https://d2lang.com/) diagrams (requires `d2` executable from https://github.com/terrastruct/d2/releases installed locally)
 - TextMate grammars (requires the [Eclipse TM4E](https://github.com/eclipse-tm4e/tm4e) plugin)
+
+Embedded Graphviz DOT blocks use the configured Graphviz renderer from the Eclipse preferences.
 
 This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
 and [Extra Syntax Highlighting Plugin](https://github.com/sebthom/extra-syntax-highlighting-eclipse-plugin)
@@ -40,7 +45,7 @@ which provide syntax highlighting for the supported source files.
 
   ![](src/site/img/screen_markdown.png)
 
-- GraphViz example:
+- Graphviz example:
 
   ![](src/site/img/screen_graphviz.png)
 
@@ -135,7 +140,7 @@ To build the project follow these steps:
 
 **Draw.io** diagrams are rendered using https://www.draw.io/js/viewer.min.js, which is licensed under [Apache License 2.0 ](https://github.com/jgraph/drawio/blob/dev/LICENSE).
 
-By default, **GraphViz DOT** files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
+By default, **Graphviz DOT** files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
 
 By default, **Markdown** files are rendered using a bundled version of [CommonMark Java](https://github.com/commonmark/commonmark-java), which is licensed under [BSD-2-Clause](https://github.com/commonmark/commonmark-java/blob/main/LICENSE.txt).
 

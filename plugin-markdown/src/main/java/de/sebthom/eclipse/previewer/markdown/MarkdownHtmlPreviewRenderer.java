@@ -18,6 +18,8 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.markdown.prefs.PluginPreferences;
+import de.sebthom.eclipse.previewer.markdown.preprocessor.MarkdownDiagramPreprocessor;
+import de.sebthom.eclipse.previewer.markdown.preprocessor.MarkdownPreprocessingResult;
 import de.sebthom.eclipse.previewer.markdown.renderer.CommonMarkRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.GitHubMarkdownRenderer;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
@@ -87,21 +89,26 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
       var renderer = PluginPreferences.getMarkdownRenderer();
+      final var preprocessedMarkdown = PluginPreferences.isRenderPlantUmlAndGraphvizDiagrams() //
+            ? MarkdownDiagramPreprocessor.preprocess(source)
+            : MarkdownPreprocessingResult.unchanged(source);
 
       final var htmlBody = new StringBuilder();
 
       boolean isCommonMarkFallback = false;
       try {
-         renderer.markdownToHTML(source, htmlBody);
+         renderer.markdownToHTML(preprocessedMarkdown.source(), htmlBody);
       } catch (final ConnectException ex) {
          if (renderer instanceof GitHubMarkdownRenderer && PluginPreferences.isGithubApiFallbackToCommonMark()) {
             Plugin.log().debug(ex);
+            htmlBody.setLength(0);
             renderer = CommonMarkRenderer.INSTANCE;
-            renderer.markdownToHTML(source, htmlBody);
+            renderer.markdownToHTML(preprocessedMarkdown.source(), htmlBody);
             isCommonMarkFallback = true;
          } else
             throw ex;
       }
+      preprocessedMarkdown.applyHtmlReplacements(htmlBody);
 
       final var rendererName = isCommonMarkFallback //
             ? "CommonMark, GitHub Markdown API unavailable"
@@ -132,4 +139,5 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
+
 }

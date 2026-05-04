@@ -13,8 +13,8 @@ import org.eclipse.jface.preference.IPersistentPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 
 import de.sebthom.eclipse.previewer.graphviz.Plugin;
-import de.sebthom.eclipse.previewer.graphviz.renderer.GraphVizNativeRenderer;
 import de.sebthom.eclipse.previewer.graphviz.renderer.GraphvizEmbeddedRenderer;
+import de.sebthom.eclipse.previewer.graphviz.renderer.GraphvizNativeRenderer;
 import de.sebthom.eclipse.previewer.graphviz.renderer.GraphvizRenderer;
 import net.sf.jstuff.core.io.RuntimeIOException;
 
@@ -61,10 +61,10 @@ public final class PluginPreferences {
    public static GraphvizRenderer getGraphvizRenderer() {
       final boolean wantsNative = PREF_GRAPHVIZ_RENDERER_NATIVE.equals(STORE.getString(PREF_GRAPHVIZ_RENDERER));
       if (wantsNative) {
-         final boolean nativeAvailable = GraphVizNativeRenderer.INSTANCE.isAvailable();
+         final boolean nativeAvailable = GraphvizNativeRenderer.INSTANCE.isAvailable();
          final boolean fallbackAllowed = STORE.getBoolean(PREF_GRAPHVIZ_NATIVE_FALLBACK_TO_EMBEDDED);
          if (nativeAvailable || !fallbackAllowed)
-            return GraphVizNativeRenderer.INSTANCE;
+            return GraphvizNativeRenderer.INSTANCE;
       }
       return GraphvizEmbeddedRenderer.INSTANCE;
    }

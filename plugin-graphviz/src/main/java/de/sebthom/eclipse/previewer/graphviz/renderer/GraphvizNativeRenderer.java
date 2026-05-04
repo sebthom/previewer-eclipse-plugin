@@ -22,9 +22,11 @@ import net.sf.jstuff.core.io.Processes;
 /**
  * @author Sebastian Thomschke
  */
-public enum GraphVizNativeRenderer implements GraphvizRenderer {
+public enum GraphvizNativeRenderer implements GraphvizRenderer {
 
    INSTANCE;
+
+   private static final String SVG_VIEW_BOX_ATTRIBUTE = " viewBox";
 
    public boolean isAvailable() {
       var exe = Path.of(PluginPreferences.getGraphvizNativeExe());
@@ -61,6 +63,12 @@ public enum GraphVizNativeRenderer implements GraphvizRenderer {
          proc.terminate();
       }
 
-      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<svg width='100%'" + sb.substring(sb.indexOf(" viewBox"), sb.length())));
+      final String svg = sb.toString();
+      final int viewBoxIndex = svg.indexOf(SVG_VIEW_BOX_ATTRIBUTE);
+      if (viewBoxIndex < 0) {
+         throw new IOException("Graphviz did not produce SVG output: " + svg);
+      }
+
+      out.append(StringUtils.htmlSvgWithHoverDownloadButton("<svg width='100%'" + svg.substring(viewBoxIndex)));
    }
 }

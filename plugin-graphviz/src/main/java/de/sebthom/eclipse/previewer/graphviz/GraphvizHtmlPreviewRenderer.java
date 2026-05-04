@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.graphviz;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.IOException;
 
@@ -15,8 +15,8 @@ import org.apache.commons.lang3.SystemUtils;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.graphviz.prefs.PluginPreferences;
-import de.sebthom.eclipse.previewer.graphviz.renderer.GraphVizNativeRenderer;
 import de.sebthom.eclipse.previewer.graphviz.renderer.GraphvizEmbeddedRenderer;
+import de.sebthom.eclipse.previewer.graphviz.renderer.GraphvizNativeRenderer;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 
@@ -45,38 +45,20 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
       final var renderer = PluginPreferences.getGraphvizRenderer();
 
-      final var rendererName = renderer instanceof GraphVizNativeRenderer //
+      final var rendererName = renderer instanceof GraphvizNativeRenderer //
             ? "dot"
             : renderer instanceof GraphvizEmbeddedRenderer //
                   ? "viz.js"
                   : renderer.getClass().getSimpleName();
 
-      if (SystemUtils.IS_OS_WINDOWS) {
-         if (renderer instanceof GraphvizEmbeddedRenderer) {
-            out.append(
-               """
-                  <div id="ieNotSupported" style="display: none; padding: 20px; background-color: #f44336; color: white; text-align: center; font-size: 18px;">
-                    Previewing GraphViz diagrams using the embedded viz.js library is not supported using the Internet Explorer WebView.<br/>
-                    <br/>
-                    Please switch to Edge WebView2 under <b>Window &gt; Preferences &gt; Previewer &gt; Web View Implementation</b> or
-                    switch to the GraphViz DOT renderer under <b>Window &gt; Preferences &gt; Previewer &gt; GraphViz &gt; GraphViz renderer</b> .
-                  </div>
-
-                  <script>
-                    if (window.navigator.userAgent.match(/MSIE|Trident|Edge/)) {
-                      document.getElementById('ieNotSupported').style.display = 'block';
-                    }
-                  </script>
-                  """);
-         } else {
-            out.append("""
-               <script>
-                 if (window.navigator.userAgent.match(/MSIE|Trident|Edge/)) {
-                    document.body.style.overflowX = 'hidden';
-                 }
-               </script>
-               """);
-         }
+      if (SystemUtils.IS_OS_WINDOWS && !(renderer instanceof GraphvizEmbeddedRenderer)) {
+         out.append("""
+            <script>
+              if (window.navigator.userAgent.match(/MSIE|Trident|Edge/)) {
+                 document.body.style.overflowX = 'hidden';
+              }
+            </script>
+            """);
       }
 
       renderer.dotToHTML(source, out);
