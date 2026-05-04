@@ -79,6 +79,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.commonmark.ext-gfm-alerts"
+         version="0.0.0"/>
+
+   <plugin
          id="org.commonmark.ext-gfm-strikethrough"
          version="0.0.0"/>
 
