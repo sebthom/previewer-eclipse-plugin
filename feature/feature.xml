@@ -59,6 +59,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="org.apache.commons.commons-csv"
+         version="0.0.0"/>
+
+   <plugin
          id="net.sf.jstuff.core"
          version="0.0.0"/>
 

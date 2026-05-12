@@ -22,6 +22,7 @@ This **extensible** [EclipseⓇ](https://eclipse.org) plugin contributes a new *
 opened in text editors.
 
 The following formats are supported out of the box:
+- CSV and TSV files
 - [Draw.io](https://www.drawio.com/) diagrams
 - [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/), including fenced blocks for:
     - Mermaid: `mermaid`

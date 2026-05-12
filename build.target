@@ -39,6 +39,12 @@
                <version>1.2026.2</version>
                <type>jar</type>
             </dependency>
+            <dependency>
+               <groupId>org.apache.commons</groupId>
+               <artifactId>commons-csv</artifactId>
+               <version>1.14.1</version>
+               <type>jar</type>
+            </dependency>
          </dependencies>
          <instructions><![CDATA[
 Bundle-Name:           Bundle derived from maven artifact ${mvnGroupId}:${mvnArtifactId}:${mvnVersion}

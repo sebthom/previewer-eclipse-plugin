@@ -178,6 +178,7 @@
       <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.HtmlFilePreviewRenderer" file-extensions="htm,html">
          <content-type id="text.html.basic" />
       </htmlPreviewRenderer>
+      <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.CsvPreviewRenderer" file-extensions="csv,tsv" />
       <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.XmlPreviewRenderer" file-extensions="xml">
          <content-type id="text.xml" />
       </htmlPreviewRenderer>
