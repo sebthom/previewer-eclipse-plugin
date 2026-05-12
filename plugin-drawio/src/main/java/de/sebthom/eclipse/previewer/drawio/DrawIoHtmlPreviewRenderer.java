@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.drawio;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.IOException;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -28,8 +26,6 @@ public class DrawIoHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       out.append("<!DOCTYPE html>");
       out.append("<html>");
       out.append("<head>");
@@ -88,7 +84,7 @@ public class DrawIoHtmlPreviewRenderer implements HtmlPreviewRenderer {
          window.GraphViewer.processElements()
          </script>
          """);
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

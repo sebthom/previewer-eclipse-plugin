@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.plantuml;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.IOException;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
@@ -36,10 +34,8 @@ public class PlantUmlHtmlPreviewRenderer implements HtmlPreviewRenderer {
          <body>
          """);
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       PlantUmlRendering.renderToHtmlFragment(source.contentAsString(), out);
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

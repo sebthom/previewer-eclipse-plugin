@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.graphviz;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
-
 import java.io.IOException;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -41,8 +39,6 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
          <body>
          """);
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       final var renderer = PluginPreferences.getGraphvizRenderer();
 
       final var rendererName = renderer instanceof GraphvizNativeRenderer //
@@ -62,7 +58,7 @@ public class GraphvizHtmlPreviewRenderer implements HtmlPreviewRenderer {
       }
 
       renderer.dotToHTML(source, out);
-      out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

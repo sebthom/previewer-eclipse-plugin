@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.d2;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.IOException;
 
 import org.apache.commons.lang3.SystemUtils;
@@ -39,8 +37,6 @@ public class D2HtmlPreviewRenderer implements HtmlPreviewRenderer {
          <body>
          """);
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       final var renderer = PluginPreferences.getD2Renderer();
 
       if (SystemUtils.IS_OS_WINDOWS) {
@@ -54,7 +50,7 @@ public class D2HtmlPreviewRenderer implements HtmlPreviewRenderer {
       }
 
       renderer.d2ToHTML(source, out);
-      out.append(StringUtils.htmlInfoBox(shortPath + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

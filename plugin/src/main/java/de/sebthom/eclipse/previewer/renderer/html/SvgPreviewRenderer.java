@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.renderer.html;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.IOException;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
@@ -37,11 +35,9 @@ public class SvgPreviewRenderer implements HtmlPreviewRenderer {
          <body class='markdown-body' style='padding:5px'>
          """);
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       out.append(StringUtils.htmlSvgWithHoverDownloadButton("<svg viewBox='0 0 width height' " + Strings.substringBetween(source
          .contentAsString(), "<svg ", "</svg>") + "</svg>"));
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }

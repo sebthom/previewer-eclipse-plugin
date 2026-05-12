@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.markdown;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -118,8 +116,6 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
                         ? "GitHub Markdown API"
                         : renderer.getClass().getSimpleName();
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       final var useDarkTheme = MiscUtils.isDarkEclipseTheme();
       out.append("<!DOCTYPE html>"); // https://github.com/sindresorhus/github-markdown-css#troubleshooting
       out.append("<html>");
@@ -136,7 +132,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", useDarkTheme ? "dark" : "default"));
       }
-      out.append(StringUtils.htmlInfoBox(shortPath + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 

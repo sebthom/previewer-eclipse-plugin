@@ -6,8 +6,6 @@
  */
 package de.sebthom.eclipse.previewer.mermaid;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -67,8 +65,6 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
          out.append("<style>html, body { background: #585858; color: #fff; }</style>");
       }
 
-      final var shortPath = source.path().getParent().getFileName().resolve(asNonNull(source.path().getFileName()));
-
       if (SystemUtils.IS_OS_WINDOWS) {
          out.append(
             """
@@ -94,7 +90,7 @@ public class MermaidHtmlPreviewRenderer implements HtmlPreviewRenderer {
          </pre>
          """);
       out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", MiscUtils.isDarkEclipseTheme() ? "dark" : "default"));
-      out.append(StringUtils.htmlInfoBox(shortPath + " " + MiscUtils.getCurrentTime()));
+      out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");
    }
 }
