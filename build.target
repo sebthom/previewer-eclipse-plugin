@@ -62,7 +62,7 @@ DynamicImport-Package: *
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
          </dependencies>
@@ -82,43 +82,43 @@ DynamicImport-Package: *
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-autolink</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-footnotes</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-gfm-alerts</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-gfm-strikethrough</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
               <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-gfm-tables</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-heading-anchor</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-image-attributes</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
             <dependency>
@@ -136,7 +136,7 @@ DynamicImport-Package: *
             <dependency>
                <groupId>org.commonmark</groupId>
                <artifactId>commonmark-ext-yaml-front-matter</artifactId>
-               <version>0.28.0</version>
+               <version>0.29.0</version>
                <type>jar</type>
             </dependency>
          </dependencies>
