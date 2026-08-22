@@ -7,8 +7,9 @@
 package de.sebthom.eclipse.previewer.textmate;
 
 import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
-import static org.eclipse.tm4e.registry.TMEclipseRegistryPlugin.getGrammarRegistryManager;
+import static org.eclipse.tm4e.registry.TMEclipseRegistryPlugin.*;
 import static org.eclipse.tm4e.ui.TMUIPlugin.*;
+import static org.eclipse.tm4e.ui.TMUIPlugin.PLUGIN_ID;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +20,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Objects;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.FontDescriptor;
@@ -48,7 +51,7 @@ import org.eclipse.tm4e.core.registry.IRegistryOptions;
 import org.eclipse.tm4e.core.registry.Registry;
 import org.eclipse.tm4e.registry.IGrammarDefinition;
 import org.eclipse.tm4e.registry.ITMScope;
-import org.eclipse.tm4e.ui.samples.ISample;
+import org.eclipse.tm4e.registry.TMResource;
 import org.eclipse.tm4e.ui.text.TMPresentationReconciler;
 import org.eclipse.tm4e.ui.themes.ITheme;
 
@@ -61,6 +64,31 @@ import de.sebthom.eclipse.previewer.api.PreviewRenderer;
  */
 public class TextMatePreviewRenderer implements PreviewRenderer {
 
+   /**
+    * NOTE: SampleResource is a workaround for TM4E 0.15. TMUIPlugin.getSampleManager() exposes
+    * org.eclipse.tm4e.ui.samples.ISample from a package that version does not export. Extending TMResource retains
+    * TM4E's platform:/plugin resolution and error logging in the meantime.
+    * <p>
+    * After upgrading to TM4E 0.18+ and Java 21, delete SampleResource and findSampleText(), import ISample, and
+    * implement getSampleText() with:
+    *
+    * <pre>
+    * final ISample[] samples = getSampleManager().getSamples(scopeName);
+    * return samples.length > 0 ? samples[0].getContent() : "";
+    * </pre>
+    */
+   private static final class SampleResource extends TMResource {
+
+      SampleResource(final IConfigurationElement element) {
+         super(element);
+      }
+
+      String getContent() {
+         final var content = getResourceContent();
+         return content == null ? "" : content;
+      }
+   }
+
    private static IGrammarSource.ContentType detectContentType(final Path path) {
       final String name = path.getFileName().toString().toLowerCase();
       if (name.endsWith(".json") || name.endsWith(".tmlanguage.json"))
@@ -69,6 +97,28 @@ public class TextMatePreviewRenderer implements PreviewRenderer {
          return IGrammarSource.ContentType.YAML;
       // default to XML/plist
       return IGrammarSource.ContentType.XML;
+   }
+
+   private static @Nullable String findSampleText(final String extensionPointId, final String elementName, final String scopeName) {
+      for (final IConfigurationElement element : Platform.getExtensionRegistry().getConfigurationElementsFor(PLUGIN_ID, extensionPointId)) {
+         if (elementName.equals(element.getName()) && scopeName.equals(element.getAttribute("scopeName")))
+            return new SampleResource(element).getContent();
+      }
+      return null;
+   }
+
+   private static String getSampleText(final String scopeName) {
+      /*
+       * NOTE: TM4E 0.15 does not export its sample API. Read the documented extension points directly until the
+       * project can move to TM4E 0.18, which requires Java 21.
+       */
+      final @Nullable String snippetText = findSampleText("snippets", "snippet", scopeName);
+      // TM4E 0.15 checks deprecated snippets first, so preserve its precedence when both contribution types exist.
+      if (snippetText != null)
+         return snippetText;
+
+      final @Nullable String sampleText = findSampleText("samples", "sample", scopeName);
+      return sampleText == null ? "" : sampleText;
    }
 
    private final TMPresentationReconciler reconciler = new TMPresentationReconciler();
@@ -309,8 +359,7 @@ public class TextMatePreviewRenderer implements PreviewRenderer {
 
       final IGrammar grammar = newTemporaryRegistry().addGrammar(gs);
 
-      final ISample[] samples = getSampleManager().getSamples(grammar.getScopeName());
-      final String sampleText = samples.length > 0 ? samples[0].getContent() : "";
+      final String sampleText = getSampleText(grammar.getScopeName());
 
       UI.run(() -> {
          reconciler.setGrammar(grammar);
