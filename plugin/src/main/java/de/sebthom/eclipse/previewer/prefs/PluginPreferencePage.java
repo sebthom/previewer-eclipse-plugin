@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.prefs;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,7 +177,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          addField(new ComboFieldEditor(PluginPreferences.PREF_WINDOWS_WEBVIEW,
             "Web View Implementation (changing may require app restart):", new String[][] { //
                new String[] {"Microsoft Edge WebView2 (experimental, may freeze)", "edge"}, //
-               new String[] {"Microsoft Internet Explorer (stable, but does not support rendering Mermaid diagrams)", "default"} //
+               new String[] {"Microsoft Internet Explorer (stable, but does not support rendering Mermaid diagrams and TeX/LaTeX math)",
+                  "default"} //
             }, parent));
       }
    }

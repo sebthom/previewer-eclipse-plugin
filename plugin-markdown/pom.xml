@@ -29,4 +29,34 @@
 
    </properties>
 
+   <dependencies>
+      <dependency>
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter</artifactId>
+         <version>6.1.3</version>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <!-- Tycho compiles test sources for eclipse-plugin modules but does not bind the plain JVM test runner. -->
+            <executions>
+               <execution>
+                  <id>execute-unit-tests</id>
+                  <goals>
+                     <goal>test</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <!-- Do not allow this module to return to silently compiling without executing its tests. -->
+            <configuration>
+               <failIfNoTests>true</failIfNoTests>
+            </configuration>
+         </plugin>
+      </plugins>
+   </build>
 </project>

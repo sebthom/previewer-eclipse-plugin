@@ -1,0 +1,7 @@
+MathJax 4.1.3
+
+tex-svg.js:
+https://www.npmjs.com/package/@mathjax/mathjax-tex-font/v/4.1.3
+
+input/tex/extensions/color.js, ui/safe.js, and LICENSE.txt:
+https://github.com/mathjax/MathJax/tree/4.1.3
