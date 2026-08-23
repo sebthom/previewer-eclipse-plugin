@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 
 import de.sebthom.eclipse.previewer.api.ContentSource;
@@ -30,6 +31,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    private File cssDark;
    private File cssLight;
+   private @Nullable File mathJaxJS;
    private File mermaidJS;
 
    private static final String MERMAID_INIT_SCRIPT = """
@@ -84,6 +86,18 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
          .getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 4);
    }
 
+   private synchronized File getMathJaxJS() throws IOException {
+      var mathJaxJS = this.mathJaxJS;
+      if (mathJaxJS == null) {
+         // Delay extraction of the large component until a preview actually contains an explicit math marker.
+         Plugin.resources().extract(Constants.MATHJAX_COLOR_JS);
+         Plugin.resources().extract(Constants.MATHJAX_SAFE_JS);
+         // The combined SVG component embeds MathJax's compact TeX font and therefore needs no extracted font tree.
+         this.mathJaxJS = mathJaxJS = Plugin.resources().extract(Constants.MATHJAX_JS);
+      }
+      return mathJaxJS;
+   }
+
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
       var renderer = PluginPreferences.getMarkdownRenderer();
@@ -107,6 +121,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
             throw ex;
       }
       preprocessedMarkdown.applyHtmlReplacements(htmlBody);
+      final boolean containsMath = MathJaxSupport.containsMath(htmlBody);
 
       final var rendererName = isCommonMarkFallback //
             ? "CommonMark, GitHub Markdown API unavailable"
@@ -131,6 +146,9 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append(htmlBody);
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", useDarkTheme ? "dark" : "default"));
+      }
+      if (containsMath) {
+         out.append(MathJaxSupport.createInitializationScript(getMathJaxJS()));
       }
       out.append(StringUtils.htmlInfoBox(source.shortDisplayPath() + " (" + rendererName + ") " + MiscUtils.getCurrentTime()));
       out.append("</body></html>");

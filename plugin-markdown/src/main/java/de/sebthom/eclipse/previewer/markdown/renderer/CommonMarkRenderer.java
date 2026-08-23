@@ -40,6 +40,7 @@ public class CommonMarkRenderer implements MarkdownRenderer {
          AlertsExtension.create(), //
          AutolinkExtension.create(), //
          FootnotesExtension.create(), //
+         GitHubMathExtension.create(), //
          HeadingAnchorExtension.create(), //
          ImageAttributesExtension.create(), //
          InsExtension.create(), //
