@@ -34,6 +34,8 @@ import net.sf.jstuff.core.Strings;
 import net.sf.jstuff.core.SystemUtils;
 
 /**
+ * Configures the core preview renderer, cache, editor, and Windows browser preferences.
+ *
  * @author Sebastian Thomschke
  */
 public final class PluginPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
@@ -177,7 +179,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          addField(new ComboFieldEditor(PluginPreferences.PREF_WINDOWS_WEBVIEW,
             "Web View Implementation (changing may require app restart):", new String[][] { //
                new String[] {"Microsoft Edge WebView2 (experimental, may freeze)", "edge"}, //
-               new String[] {"Microsoft Internet Explorer (stable, but does not support rendering Mermaid diagrams and TeX/LaTeX math)",
+               new String[] {
+                  "Microsoft Internet Explorer (stable, but does not support rendering Mermaid or Pikchr diagrams and TeX/LaTeX math)",
                   "default"} //
             }, parent));
       }

@@ -25,6 +25,8 @@ import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 
 /**
+ * Renders Markdown through the configured engine and adds support for embedded diagrams and math.
+ *
  * @author Sebastian Thomschke
  */
 public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {

@@ -20,6 +20,8 @@ import de.sebthom.eclipse.commons.prefs.fieldeditor.IntFieldEditor;
 import de.sebthom.eclipse.commons.prefs.fieldeditor.PasswordFieldEditor;
 
 /**
+ * Presents the Markdown renderer and embedded-content settings in Eclipse preferences.
+ *
  * @author Sebastian Thomschke
  */
 public final class PluginPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {

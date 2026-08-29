@@ -7,9 +7,13 @@
 package de.sebthom.eclipse.previewer;
 
 /**
+ * Defines stable identifiers shared by the plug-in UI and generated preview content.
+ *
  * @author Sebastian Thomschke
  */
 public interface Constants {
+
+   String JAVASCRIPT_SAVE_SVG_FUNCTION = "previewerSaveSvg";
 
    String IMAGE_ICON = "src/main/resources/images/logo.png";
 

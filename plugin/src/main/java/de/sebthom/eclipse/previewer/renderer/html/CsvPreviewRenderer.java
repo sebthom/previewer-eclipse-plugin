@@ -688,7 +688,7 @@ public class CsvPreviewRenderer implements HtmlPreviewRenderer {
 
       final var shortPath = source.shortDisplayPath();
       final var info = new StringBuilder();
-      appendEscapedHtml(info, shortPath);
+      info.append(shortPath);
       info.append(" (delimiter: ").append(delimiterLabel(csv.delimiter())).append(", ");
       info.append(csv.hasHeader() ? "header detected" : "no header detected").append(", ");
       info.append(csv.rows().size()).append(csv.rowsTruncated() ? "+ rows" : " rows").append(") ");

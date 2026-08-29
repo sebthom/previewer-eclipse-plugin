@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.util;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,9 +18,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import de.sebthom.eclipse.previewer.Constants;
 import net.sf.jstuff.core.Strings;
 
 /**
+ * Provides text and HTML helpers shared by preview renderers.
+ *
  * @author Sebastian Thomschke
  */
 public final class StringUtils {
@@ -52,7 +55,12 @@ public final class StringUtils {
       return false;
    }
 
-   public static String htmlInfoBox(final String htmlContent) {
+   /**
+    * Returns the shared preview info box for plain text.
+    *
+    * @param text plain text to display; HTML-sensitive characters are escaped by this method
+    */
+   public static String htmlInfoBox(final String text) {
       return """
 
          <style>
@@ -83,7 +91,7 @@ public final class StringUtils {
              onmouseout="this.style.background='transparent';"
              onclick="previewer_infobox_toggle()">&#11166;</button>
            <span>
-            """ + htmlContent + """
+             """ + htmlEscape(text) + """
            </span>
          </div>
 
@@ -101,7 +109,22 @@ public final class StringUtils {
            }
          </script>
 
-         """;
+          """;
+   }
+
+   private static String htmlEscape(final String text) {
+      final var escaped = new StringBuilder(text.length());
+      for (int idx = 0; idx < text.length(); idx++) {
+         switch (text.charAt(idx)) {
+            case '&' -> escaped.append("&amp;");
+            case '<' -> escaped.append("&lt;");
+            case '>' -> escaped.append("&gt;");
+            case '"' -> escaped.append("&quot;");
+            case '\'' -> escaped.append("&#39;");
+            default -> escaped.append(text.charAt(idx));
+         }
+      }
+      return escaped.toString();
    }
 
    public static String htmlSvgWithHoverDownloadButton(final String svgContent) {
@@ -136,28 +159,40 @@ public final class StringUtils {
            }
          </style>
 
-         <script>
-           document.getElementById("${SVG_ID}-download").addEventListener("click", function () {
-             try {
-               const svgString = document.getElementById("${SVG_ID}-inner").innerHTML;
-               const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-               if (window.navigator.msSaveOrOpenBlob) {
-                 window.navigator.msSaveOrOpenBlob(blob, "graphic.svg");
-               } else {
-                 const downloadLink = document.createElement("a");
-                 downloadLink.href = URL.createObjectURL(blob);
-                 downloadLink.download = "graphic.svg";
-                 document.body.appendChild(downloadLink);
-                 downloadLink.click();
-                 document.body.removeChild(downloadLink);
-               }
-            } catch (err) {
-              alert(err);
-            }
-           });
+          <script>
+            document.getElementById("${SVG_ID}-download").addEventListener("click", function () {
+              try {
+                const svg = document.getElementById("${SVG_ID}-inner").querySelector("svg");
+                if (!svg) {
+                  throw new Error("The SVG is not ready for download.");
+                }
+                // Serialize the SVG node rather than its HTML container. Asynchronous renderers may keep the SVG
+                // below a placeholder, and HTML serialization emits entities such as &nbsp; that SVG XML does not define.
+                const svgString = new XMLSerializer().serializeToString(svg);
+                if (typeof window.${SAVE_SVG_FUNCTION} === "function") {
+                  window.${SAVE_SVG_FUNCTION}(svgString);
+                  return;
+                }
+                // Cached preview pages can also be opened outside Eclipse, where SWT's browser bridge is unavailable.
+                const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                if (window.navigator.msSaveOrOpenBlob) {
+                  window.navigator.msSaveOrOpenBlob(blob, "graphic.svg");
+                } else {
+                  const downloadLink = document.createElement("a");
+                  downloadLink.href = URL.createObjectURL(blob);
+                  downloadLink.download = "graphic.svg";
+                  document.body.appendChild(downloadLink);
+                  downloadLink.click();
+                  document.body.removeChild(downloadLink);
+                }
+              } catch (err) {
+                alert(err);
+              }
+            });
          </script>
 
-         """, "${SVG_ID}", RandomStringUtils.insecure().nextAlphabetic(16), "${SVG}", svgContent);
+         """, "${SVG_ID}", RandomStringUtils.insecure().nextAlphabetic(16), "${SVG}", svgContent, "${SAVE_SVG_FUNCTION}",
+         Constants.JAVASCRIPT_SAVE_SVG_FUNCTION);
    }
 
    public static String htmlSvgZoomControls() {

@@ -19,6 +19,8 @@ import de.sebthom.eclipse.previewer.markdown.renderer.MarkdownRenderer;
 import net.sf.jstuff.core.io.RuntimeIOException;
 
 /**
+ * Defines and persists Markdown renderer and embedded-content preferences.
+ *
  * @author Sebastian Thomschke
  */
 public final class PluginPreferences {

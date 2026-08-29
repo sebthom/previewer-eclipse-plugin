@@ -39,6 +39,8 @@ import net.sf.jstuff.core.exception.Exceptions;
 import net.sf.jstuff.core.functional.ThrowingFunction;
 
 /**
+ * Selects contributed HTML renderers, caches their output, and displays generated or passthrough content in one browser.
+ *
  * @author Sebastian Thomschke
  */
 public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
@@ -209,7 +211,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       }
    }
 
-   private synchronized void navigateTo(final ContentSource source, final Path renderedContentPath) {
+   private synchronized void navigateTo(final ContentSource source, final Path renderedContentPath, final boolean enableSvgSaving) {
       var pageStateKey = currentPageStateKey;
       if (pageStateKey != null) {
          final var pageState = pageStates.get(pageStateKey);
@@ -221,7 +223,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       pageStateKey = currentPageStateKey = source.path().toString();
       final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
       currentRenderedContentPath = toCanonicalPath(renderedContentPath);
-      browser.navigateTo(renderedContentPath).thenRun(() -> {
+      browser.navigateTo(renderedContentPath, enableSvgSaving).thenRun(() -> {
          if (pageState.zoomLevel != 1.0f) {
             browser.setZoom(pageState.zoomLevel);
          }
@@ -265,13 +267,15 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
             : renderCache.computeIfAbsent(source, cacheFunction, "html");
 
       if (renderedContentPath != null) {
-         navigateTo(source, renderedContentPath);
+         navigateTo(source, renderedContentPath, true);
          return true;
       }
 
+      // Passthrough HTML/XML is source content rather than renderer-generated UI, so it must not receive the native
+      // filesystem bridge that generated preview pages use for their validated SVG download controls.
       if (source.isSynced()) {
          if (passthroughHtmlRenderer.supports(source) || passthroughXmlRenderer.supports(source)) {
-            navigateTo(source, path);
+            navigateTo(source, path, false);
             return true;
          }
       } else {
@@ -281,12 +285,12 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
                htmlBuilder.append(source.contentAsString());
                adjustHTML(path, htmlBuilder);
                return htmlBuilder;
-            }, "html")));
+            }, "html")), false);
             return true;
          }
 
          if (passthroughXmlRenderer.supports(source)) {
-            navigateTo(source, asNonNull(renderCache.computeIfAbsent(source, sourceArg -> source.contentAsString(), "xml")));
+            navigateTo(source, asNonNull(renderCache.computeIfAbsent(source, sourceArg -> source.contentAsString(), "xml")), false);
             return true;
          }
       }
