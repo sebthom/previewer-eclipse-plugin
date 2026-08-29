@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <!-- ===================================== -->
+   <!-- Renderers                             -->
+   <!-- ===================================== -->
+   <extension point="de.sebthom.eclipse.previewer.renderers">
+      <htmlPreviewRenderer
+         class="de.sebthom.eclipse.previewer.pikchr.PikchrHtmlPreviewRenderer"
+         file-extensions="pikchr" />
+   </extension>
+
+</plugin>

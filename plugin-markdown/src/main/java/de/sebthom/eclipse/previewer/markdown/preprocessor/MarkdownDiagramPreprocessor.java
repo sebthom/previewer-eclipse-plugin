@@ -35,28 +35,74 @@ import org.eclipse.jdt.annotation.Nullable;
 import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.graphviz.GraphvizRendering;
 import de.sebthom.eclipse.previewer.markdown.Plugin;
+import de.sebthom.eclipse.previewer.pikchr.PikchrRendering;
 import de.sebthom.eclipse.previewer.plantuml.PlantUmlRendering;
 
 /**
- * Replaces supported diagram fenced code blocks in Markdown with rendered HTML placeholders.
+ * Replaces supported diagram fenced code blocks in Markdown with renderer-specific HTML placeholders.
  *
  * @author Sebastian Thomschke
  */
 public final class MarkdownDiagramPreprocessor {
 
-   private record Candidate(int start, int end, @NonNull String indentation, @NonNull DiagramType type, @NonNull String source) {
+   /**
+    * Captures a validated Markdown source range and the diagram data required to replace it.
+    */
+   private record Candidate(int start, int end, @NonNull String indentation, @NonNull DiagramFence fence, @NonNull String source) {
    }
 
-   private enum DiagramType {
+   /**
+    * Represents one parsed diagram fence with its shared renderer type and occurrence-specific modifiers.
+    */
+   private record DiagramFence(@NonNull DiagramType type, @NonNull List<String> modifiers) {
+
+      static @Nullable DiagramFence fromInfo(final @Nullable String info) {
+         if (info == null)
+            return null;
+
+         final String trimmed = info.trim();
+         if (trimmed.isEmpty())
+            return null;
+
+         final String[] tokens = trimmed.split("\\s+");
+         final String language = tokens[0].toLowerCase(Locale.ROOT);
+         for (final DiagramType type : DiagramType.values()) {
+            if (!type.languages.contains(language))
+               continue;
+
+            final var modifiers = new ArrayList<String>(Math.max(0, tokens.length - 1));
+            for (int idx = 1; idx < tokens.length; idx++) {
+               modifiers.add(tokens[idx].toLowerCase(Locale.ROOT));
+            }
+            return new DiagramFence(type, List.copyOf(modifiers));
+         }
+         return null;
+      }
+   }
+
+   /**
+    * Identifies the bundled fence renderers that callers can enable for one Markdown render.
+    * <p>
+    * This type is public only for coordination within the Markdown bundle; its package is not exported as plug-in API.
+    */
+   public enum DiagramType {
       GRAPHVIZ(Set.of("dot", "graphviz")) {
          @Override
-         String render(final String source, final ContentSource context) throws IOException {
+         String render(final String source, final ContentSource context, final List<String> modifiers, final boolean useDarkTheme)
+               throws IOException {
             return GraphvizRendering.renderToHtmlFragment(source, context);
+         }
+      },
+      PIKCHR(Set.of("pikchr")) {
+         @Override
+         String render(final String source, final ContentSource context, final List<String> modifiers, final boolean useDarkTheme) {
+            return PikchrRendering.renderToHtmlFragment(source, modifiers, useDarkTheme);
          }
       },
       PLANTUML(Set.of("plantuml", "puml", "iuml", "pu")) {
          @Override
-         String render(final String source, final ContentSource context) throws IOException {
+         String render(final String source, final ContentSource context, final List<String> modifiers, final boolean useDarkTheme)
+               throws IOException {
             return PlantUmlRendering.renderToHtmlFragment(fencedSourceToPlantUmlSource(source));
          }
       };
@@ -67,23 +113,7 @@ public final class MarkdownDiagramPreprocessor {
          this.languages = languages;
       }
 
-      static @Nullable DiagramType fromInfo(final @Nullable String info) {
-         if (info == null)
-            return null;
-
-         final String trimmed = info.trim();
-         if (trimmed.isEmpty())
-            return null;
-
-         final String language = trimmed.split("\\s+", 2)[0].toLowerCase(Locale.ROOT);
-         for (final DiagramType type : values()) {
-            if (type.languages.contains(language))
-               return type;
-         }
-         return null;
-      }
-
-      abstract String render(String source, ContentSource context) throws IOException;
+      abstract String render(String source, ContentSource context, List<String> modifiers, boolean useDarkTheme) throws IOException;
    }
 
    private static final class PreprocessedContentSource implements ContentSource {
@@ -142,20 +172,24 @@ public final class MarkdownDiagramPreprocessor {
    private static final String PLACEHOLDER_PREFIX = "PREVIEWER_DIAGRAM_BLOCK_";
    private static final Parser SOURCE_SPAN_PARSER = asNonNull(Parser.builder().includeSourceSpans(IncludeSourceSpans.BLOCKS).build());
 
-   private static List<Candidate> collectCandidates(final String markdown) {
+   private static List<Candidate> collectCandidates(final String markdown, final Set<DiagramType> enabledTypes) {
       final var candidates = new ArrayList<Candidate>();
       SOURCE_SPAN_PARSER.parse(markdown).accept(new AbstractVisitor() {
          @Override
          public void visit(final @NonNullByDefault({}) FencedCodeBlock block) {
-            final DiagramType type = DiagramType.fromInfo(block.getInfo());
-            if (type == null)
+            final DiagramFence fence = DiagramFence.fromInfo(block.getInfo());
+            if (fence == null)
+               return;
+            // Apply selection after parsing so syntax validation can reparse a fence without sentinel "all enabled" flags.
+            // This also preserves Pikchr's identity before a downstream Markdown engine can normalize it to the "pic" alias.
+            if (!enabledTypes.contains(fence.type()))
                return;
 
             final SourceRange range = sourceRange(block);
             if (range == null || range.end() > markdown.length())
                return;
 
-            final Candidate candidate = validate(markdown, range, block, type);
+            final Candidate candidate = validate(markdown, range, block, fence);
             if (candidate != null) {
                candidates.add(candidate);
             }
@@ -237,9 +271,15 @@ public final class MarkdownDiagramPreprocessor {
       return lineEnd + 1;
    }
 
-   public static MarkdownPreprocessingResult preprocess(final ContentSource source) throws IOException {
+   public static MarkdownPreprocessingResult preprocess(final ContentSource source, final Set<DiagramType> enabledTypes,
+         final boolean useDarkTheme) throws IOException {
+      // Mermaid is rendered after Markdown conversion and never enters this source preprocessor. With no source-side
+      // renderer selected, preserving the original ContentSource avoids an unnecessary snapshot read and parse.
+      if (enabledTypes.isEmpty())
+         return MarkdownPreprocessingResult.unchanged(source);
+
       final String markdown = source.contentAsString();
-      final List<Candidate> candidates = collectCandidates(markdown);
+      final List<Candidate> candidates = collectCandidates(markdown, enabledTypes);
       if (candidates.isEmpty())
          return MarkdownPreprocessingResult.unchanged(source);
 
@@ -250,8 +290,8 @@ public final class MarkdownDiagramPreprocessor {
       for (int idx = 0; idx < candidates.size(); idx++) {
          final Candidate candidate = candidates.get(idx);
          try {
-            final String replacementHtml = candidate.type.render(candidate.source, source);
-            final String placeholder = PLACEHOLDER_PREFIX + idx + "_" + candidate.type.name().toLowerCase(Locale.ROOT) + "_" + Integer
+            final String replacementHtml = candidate.fence.type.render(candidate.source, source, candidate.fence.modifiers, useDarkTheme);
+            final String placeholder = PLACEHOLDER_PREFIX + idx + "_" + candidate.fence.type.name().toLowerCase(Locale.ROOT) + "_" + Integer
                .toUnsignedString(candidate.source.hashCode(), 36);
             placeholders.put(placeholder, replacementHtml);
             processedMarkdown.replace(candidate.start, candidate.end, candidate.indentation + placeholder);
@@ -295,7 +335,7 @@ public final class MarkdownDiagramPreprocessor {
    }
 
    private static @Nullable Candidate validate(final String markdown, final SourceRange range, final FencedCodeBlock block,
-         final DiagramType type) {
+         final DiagramFence fence) {
       final String candidateMarkdown = markdown.substring(range.start(), range.end());
       final String firstLine = candidateMarkdown.substring(0, lineEnd(candidateMarkdown, 0));
       final int fenceLength = fenceLength(block);
@@ -311,10 +351,10 @@ public final class MarkdownDiagramPreprocessor {
 
       final String info = firstLine.substring(fenceEnd).trim();
       // Source spans must cover the complete fenced block; otherwise replacing the range could corrupt the Markdown.
-      if (type != DiagramType.fromInfo(info) || !hasClosingFence(candidateMarkdown, fenceChar, fenceLength))
+      if (!fence.equals(DiagramFence.fromInfo(info)) || !hasClosingFence(candidateMarkdown, fenceChar, fenceLength))
          return null;
 
-      return new Candidate(range.start(), range.end(), firstLine.substring(0, fenceStart), type, asNonNull(block.getLiteral()));
+      return new Candidate(range.start(), range.end(), firstLine.substring(0, fenceStart), fence, asNonNull(block.getLiteral()));
    }
 
    private MarkdownDiagramPreprocessor() {

@@ -51,6 +51,10 @@
          version="0.0.0"/>
 
    <plugin
+         id="de.sebthom.eclipse.previewer.pikchr"
+         version="0.0.0"/>
+
+   <plugin
          id="de.sebthom.eclipse.previewer.plantuml"
          version="0.0.0"/>
 

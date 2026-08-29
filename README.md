@@ -26,6 +26,8 @@ The following formats are supported out of the box:
 - [Draw.io](https://www.drawio.com/) diagrams
 - [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/), including:
     - [Mermaid](https://mermaid.js.org/) fenced blocks: `mermaid`
+    - [Pikchr](https://pikchr.org/) fenced blocks: `pikchr`\
+      The optional `center`, `float-left`, `float-right`, and `indent` layout modifiers are supported after the language name.
     - [PlantUML](https://plantuml.com/) fenced blocks: `plantuml`, `puml`, `iuml`, `pu`
     - Graphviz [DOT](https://graphviz.org/doc/info/lang.html) fenced blocks: `dot`, `graphviz`\
       Embedded DOT blocks use the Graphviz renderer selected in the Eclipse preferences: bundled viz.js or an external
@@ -36,10 +38,14 @@ The following formats are supported out of the box:
 - Graphviz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
 - [Mermaid](https://mermaid.js.org/) diagrams
+- [Pikchr](https://pikchr.org/) diagrams
 - [PlantUML](https://plantuml.com/) diagrams
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
 - Terrastruct [D2](https://d2lang.com/) diagrams (requires `d2` executable from https://github.com/terrastruct/d2/releases installed locally)
 - TextMate grammars (requires the [Eclipse TM4E](https://github.com/eclipse-tm4e/tm4e) plugin)
+
+Pikchr rendering requires a modern browser backend.
+On Windows, select Microsoft Edge WebView2 in the Preview preference page; the legacy Internet Explorer backend cannot run the bundled WebAssembly runtime.
 
 This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
 and [Extra Syntax Highlighting Plugin](https://github.com/sebthom/extra-syntax-highlighting-eclipse-plugin)
@@ -153,6 +159,8 @@ Rendered **Markdown** files are styled using [GitHub MarkDown CSS](https://githu
 TeX math in rendered **Markdown** files uses a bundled version of [MathJax](https://github.com/mathjax/MathJax), which is licensed under [Apache License 2.0](https://github.com/mathjax/MathJax/blob/master/LICENSE).
 
 **Mermaid** files are rendered using a bundled version of [Mermaid JS](https://github.com/mermaid-js/mermaid), which is licensed under [MIT](https://github.com/mermaid-js/mermaid/blob/develop/LICENSE).
+
+**Pikchr** files and fenced blocks are rendered using bundled versions of [Pikchr](https://pikchr.org/) and [Pikchr.js](https://github.com/abetlen/pikchr-js), which are licensed under the Zero-Clause BSD license.
 
 **PlantUML** files are rendered using a bundled version of [PlantUML](https://github.com/plantuml/plantuml/), which is licensed under [MIT](https://github.com/plantuml/plantuml/blob/master/plantuml-mit/mit-license.txt)
 

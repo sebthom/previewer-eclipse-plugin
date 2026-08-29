@@ -9,6 +9,7 @@ package de.sebthom.eclipse.previewer.markdown;
 import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.EnumSet;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.annotation.Nullable;
@@ -18,9 +19,10 @@ import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.HtmlPreviewRenderer;
 import de.sebthom.eclipse.previewer.markdown.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.markdown.preprocessor.MarkdownDiagramPreprocessor;
-import de.sebthom.eclipse.previewer.markdown.preprocessor.MarkdownPreprocessingResult;
+import de.sebthom.eclipse.previewer.markdown.preprocessor.MarkdownDiagramPreprocessor.DiagramType;
 import de.sebthom.eclipse.previewer.markdown.renderer.CommonMarkRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.GitHubMarkdownRenderer;
+import de.sebthom.eclipse.previewer.pikchr.PikchrRendering;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 
@@ -83,6 +85,18 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
    public void dispose() {
    }
 
+   private static EnumSet<DiagramType> getEnabledDiagramTypes() {
+      final var enabledTypes = EnumSet.noneOf(DiagramType.class);
+      if (PluginPreferences.isRenderPlantUmlAndGraphvizDiagrams()) {
+         enabledTypes.add(DiagramType.GRAPHVIZ);
+         enabledTypes.add(DiagramType.PLANTUML);
+      }
+      if (PluginPreferences.isRenderPikchrDiagrams()) {
+         enabledTypes.add(DiagramType.PIKCHR);
+      }
+      return enabledTypes;
+   }
+
    private int getPreferredTabSize() {
       return InstanceScope.INSTANCE.getNode("org.eclipse.ui.editors") //
          .getInt(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH, 4);
@@ -103,9 +117,11 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
       var renderer = PluginPreferences.getMarkdownRenderer();
-      final var preprocessedMarkdown = PluginPreferences.isRenderPlantUmlAndGraphvizDiagrams() //
-            ? MarkdownDiagramPreprocessor.preprocess(source)
-            : MarkdownPreprocessingResult.unchanged(source);
+      // Snapshot selection once so preprocessing and required page runtimes cannot diverge if preferences change mid-render.
+      final var enabledDiagramTypes = getEnabledDiagramTypes();
+      // Resolve the theme once so embedded Pikchr SVG and the surrounding Markdown page always use the same mode.
+      final var useDarkTheme = MiscUtils.isDarkEclipseTheme();
+      final var preprocessedMarkdown = MarkdownDiagramPreprocessor.preprocess(source, enabledDiagramTypes, useDarkTheme);
 
       final var htmlBody = new StringBuilder();
 
@@ -133,7 +149,6 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
                         ? "GitHub Markdown API"
                         : renderer.getClass().getSimpleName();
 
-      final var useDarkTheme = MiscUtils.isDarkEclipseTheme();
       out.append("<!DOCTYPE html>"); // https://github.com/sindresorhus/github-markdown-css#troubleshooting
       out.append("<html>");
       out.append("<head>");
@@ -142,6 +157,9 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append("<style>* { tab-size: " + getPreferredTabSize() + " !important}</style>");
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append("<script src='" + mermaidJS.toURI() + "'></script>");
+      }
+      if (enabledDiagramTypes.contains(DiagramType.PIKCHR)) {
+         PikchrRendering.appendPageSupport(out);
       }
       out.append("</head>");
       out.append("<body class='markdown-body' style='padding:5px'>\n\n");

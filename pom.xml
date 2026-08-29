@@ -45,6 +45,7 @@
       <module>plugin-graphviz</module>
       <module>plugin-markdown</module>
       <module>plugin-mermaid</module>
+      <module>plugin-pikchr</module>
       <module>plugin-plantuml</module>
       <module>plugin-textmate</module>
       <module>feature</module>

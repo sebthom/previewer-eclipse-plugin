@@ -16,17 +16,16 @@
       <version>1.0.0-SNAPSHOT</version>
    </parent>
 
-   <artifactId>de.sebthom.eclipse.previewer.markdown</artifactId>
+   <artifactId>de.sebthom.eclipse.previewer.pikchr</artifactId>
    <packaging>eclipse-plugin</packaging>
 
    <properties>
       <!--
       [WARNING] Rule 0: org.apache.maven.plugins.enforcer.BanCircularDependencies failed with message:
       Circular Dependency found. Your project's groupId:artifactId combination must not exist in the list of direct or transitive dependencies.
-        de.sebthom.eclipse.previewer:de.sebthom.eclipse.previewer.markdown
+        de.sebthom.eclipse.previewer:de.sebthom.eclipse.previewer.pikchr
        -->
       <skip.enforcer.basic-checks>true</skip.enforcer.basic-checks>
-
    </properties>
 
    <dependencies>

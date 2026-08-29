@@ -48,6 +48,7 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
       ));
 
       addField(new BooleanFieldEditor(PluginPreferences.PREF_RENDER_MERMAID_DIAGRAMS, "Render Mermaid diagrams", parent));
+      addField(new BooleanFieldEditor(PluginPreferences.PREF_RENDER_PIKCHR_DIAGRAMS, "Render Pikchr diagrams", parent));
       addField(new BooleanFieldEditor(PluginPreferences.PREF_RENDER_PLANTUML_AND_GRAPHVIZ_DIAGRAMS, "Render PlantUML and Graphviz diagrams",
          parent));
    }
