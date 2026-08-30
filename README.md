@@ -21,6 +21,10 @@
 This **extensible** [EclipseⓇ](https://eclipse.org) plugin contributes a new **Preview** view that displays rendered versions of files
 opened in text editors.
 
+This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
+and [Extra Syntax Highlighting Plugin](https://github.com/sebthom/extra-syntax-highlighting-eclipse-plugin)
+which provide syntax highlighting for the supported source files.
+
 The following formats are supported out of the box:
 - CSV and TSV files
 - [Draw.io](https://www.drawio.com/) diagrams
@@ -34,34 +38,52 @@ The following formats are supported out of the box:
       `dot` executable.
     - [TeX/LaTeX math](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions) in GitHub's inline, display, and fenced `math` forms\
       Math is rendered locally with the bundled [MathJax](https://www.mathjax.org/) when Eclipse uses a modern browser backend.\
-      The legacy Internet Explorer browser backend cannot run MathJax and displays the TeX source instead.
+      On Windows, select *Microsoft Edge WebView2* in the Preview preference page; the legacy Internet Explorer
+      browser backend cannot run MathJax and displays the TeX source instead.
 - Graphviz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
 - [Mermaid](https://mermaid.js.org/) diagrams
-- [Pikchr](https://pikchr.org/) diagrams
+- [Pikchr](https://pikchr.org/) diagrams\
+  Pikchr is rendered locally with the bundled WebAssembly runtime when Eclipse uses a modern browser backend.\
+  On Windows, select *Microsoft Edge WebView2* in the Preview preference page; the legacy Internet Explorer
+  browser backend cannot run the bundled runtime.
 - [PlantUML](https://plantuml.com/) diagrams
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
 - Terrastruct [D2](https://d2lang.com/) diagrams (requires `d2` executable from https://github.com/terrastruct/d2/releases installed locally)
 - TextMate grammars (requires the [Eclipse TM4E](https://github.com/eclipse-tm4e/tm4e) plugin)
 
-Pikchr rendering requires a modern browser backend.
-On Windows, select Microsoft Edge WebView2 in the Preview preference page; the legacy Internet Explorer backend cannot run the bundled WebAssembly runtime.
+### Markdown rendering
 
-This plugin is best used together with the [TM4E incl. Language Pack](https://github.com/eclipse/tm4e)
-and [Extra Syntax Highlighting Plugin](https://github.com/sebthom/extra-syntax-highlighting-eclipse-plugin)
-which provide syntax highlighting for the supported source files.
+By default, Markdown previews are rendered locally with CommonMark for privacy: their source is not sent to the GitHub
+API.
+To use another mode, select the **Markdown Renderer** on the **Preview > Markdown** preference page:
 
-- Markdown example:
+- **CommonMark (= offline rendering)** - the default; renders Markdown locally without using the GitHub API.
+- **GitHub Markdown API (= online rendering)** - uses the configured GitHub API for every Markdown preview.\
+  An API token is not required for public content, but it is recommended for either GitHub mode because authenticated
+  requests have a much higher [REST API rate limit](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api).
+  Configure it using **API Token** on the same preference page.\
+  The **Use CommonMark renderer when offline or GitHub Markdown API is unavailable** preference makes either GitHub
+  mode fall back to CommonMark when the API is unavailable.
+  This fallback is enabled by default.
+- **Automatic (= GitHub API for non-ignored files in GitHub repositories)** - uses the GitHub API only for existing,
+  non-ignored files in repositories with a `github.com` remote, and CommonMark for all other files.\
+  Automatic mode also falls back to CommonMark when JGit is unavailable or the repository status cannot be determined.\
+  Note that Git treats indexed files as non-ignored, even when a later ignore rule matches them.
 
-  ![](src/site/img/screen_markdown.png)
+### Examples
 
-- Graphviz example:
+#### Markdown
 
-  ![](src/site/img/screen_graphviz.png)
+![](src/site/img/screen_markdown.png)
 
-- TextMate Grammar example:
+#### Graphviz
 
-  ![](src/site/img/screen_textmate.png)
+![](src/site/img/screen_graphviz.png)
+
+#### TextMate Grammar
+
+![](src/site/img/screen_textmate.png)
 
 
 ## <a name="installation"></a>Installation

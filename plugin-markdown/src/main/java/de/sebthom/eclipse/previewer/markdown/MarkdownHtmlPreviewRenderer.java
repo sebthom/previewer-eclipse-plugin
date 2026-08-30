@@ -116,7 +116,7 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    @Override
    public void renderToHtml(final ContentSource source, final Appendable out) throws IOException {
-      var renderer = PluginPreferences.getMarkdownRenderer();
+      var renderer = PluginPreferences.getMarkdownRenderer(source.path());
       // Snapshot selection once so preprocessing and required page runtimes cannot diverge if preferences change mid-render.
       final var enabledDiagramTypes = getEnabledDiagramTypes();
       // Resolve the theme once so embedded Pikchr SVG and the surrounding Markdown page always use the same mode.

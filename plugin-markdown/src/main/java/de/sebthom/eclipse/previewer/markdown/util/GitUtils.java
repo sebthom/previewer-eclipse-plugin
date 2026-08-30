@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.markdown.util;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,9 +18,16 @@ import org.eclipse.jdt.annotation.Nullable;
 import de.sebthom.eclipse.previewer.markdown.Plugin;
 
 /**
+ * Provides lightweight Git discovery and privacy-gated classification of files for GitHub rendering.
+ *
  * @author Sebastian Thomschke
  */
 public final class GitUtils {
+
+   // This is a privacy gate, so the entire remote URL and exact github.com host must match; both URI and SCP-like Git forms are accepted.
+   private static final Pattern GITHUB_REPOSITORY_URL = Pattern.compile(
+      "^(?:(?:https?|git|ssh)://(?:[^/@]+@)?github\\.com(?::\\d+)?/|(?:[^@/:]+@)?github\\.com:)([^/]+)/([^/#?]+?)(?:\\.git)?/?$",
+      Pattern.CASE_INSENSITIVE);
 
    public static boolean isFileInGitRepo(final Path path) {
       return findGitRepoRoot(path) != null;
@@ -68,16 +75,37 @@ public final class GitUtils {
    }
 
    public static String @Nullable [] getGitHubOrgAndRepo(final Path path) {
+      try {
+         return JGitRepositoryInspector.getGitHubOrgAndRepo(path);
+      } catch (final Exception | LinkageError ex) {
+         // Explicit GitHub rendering predates the optional JGit integration, so retain its origin-only context fallback when JGit cannot load.
+      }
+
       final var gitRepoUrl = getGitRepoUrl(path);
       return gitRepoUrl == null ? null : getGitHubOrgAndRepo(gitRepoUrl);
    }
 
    public static String @Nullable [] getGitHubOrgAndRepo(final String url) {
-      final var pattern = Pattern.compile("github\\.com[:/](.+?)/(.+?)(\\.git)?$");
-      final var matcher = pattern.matcher(url);
-      if (matcher.find())
+      final var matcher = GITHUB_REPOSITORY_URL.matcher(url);
+      if (matcher.matches())
          return new String[] {asNonNull(matcher.group(1)), asNonNull(matcher.group(2))};
       return null;
+   }
+
+   /**
+    * @return {@code true} only when repository metadata positively identifies the file as suitable for automatic GitHub API rendering
+    */
+   public static boolean isFileEligibleForGitHubRendering(final Path path) {
+      try {
+         // Keep every JGit-typed reference behind this call so the bundle still loads when the optional bundle is absent.
+         return JGitRepositoryInspector.isFileEligibleForGitHubRendering(path);
+      } catch (final Exception | LinkageError ex) {
+         // Automatic mode is a privacy boundary: unavailable or inconclusive inspection must keep the content local.
+         if (Plugin.isInitialized()) {
+            Plugin.log().debug(ex);
+         }
+         return false;
+      }
    }
 
    private GitUtils() {

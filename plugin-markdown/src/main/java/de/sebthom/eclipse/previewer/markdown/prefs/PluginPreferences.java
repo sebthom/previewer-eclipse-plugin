@@ -7,6 +7,7 @@
 package de.sebthom.eclipse.previewer.markdown.prefs;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPersistentPreferenceStore;
@@ -16,6 +17,7 @@ import de.sebthom.eclipse.previewer.markdown.Plugin;
 import de.sebthom.eclipse.previewer.markdown.renderer.CommonMarkRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.GitHubMarkdownRenderer;
 import de.sebthom.eclipse.previewer.markdown.renderer.MarkdownRenderer;
+import de.sebthom.eclipse.previewer.markdown.util.GitUtils;
 import net.sf.jstuff.core.io.RuntimeIOException;
 
 /**
@@ -25,11 +27,15 @@ import net.sf.jstuff.core.io.RuntimeIOException;
  */
 public final class PluginPreferences {
 
+   static final String MARKDOWN_RENDERER_COMMONMARK = "commonmark";
+   static final String MARKDOWN_RENDERER_GITHUB = "github";
+   static final String MARKDOWN_RENDERER_GITHUB_AUTOMATIC = "github-automatic";
+
    public static final class Initializer extends AbstractPreferenceInitializer {
 
       @Override
       public void initializeDefaultPreferences() {
-         STORE.setDefault(PREF_MARKDOWN_RENDERER, "commonmark");
+         STORE.setDefault(PREF_MARKDOWN_RENDERER, MARKDOWN_RENDERER_COMMONMARK);
 
          STORE.setDefault(PREF_GITHUB_API_URL, "https://api.github.com");
          STORE.setDefault(PREF_GITHUB_API_MARKDOWN_MODE, "gfm");
@@ -74,10 +80,16 @@ public final class PluginPreferences {
       }
    }
 
-   public static MarkdownRenderer getMarkdownRenderer() {
-      return "github".equals(STORE.getString(PREF_MARKDOWN_RENDERER)) //
-            ? GitHubMarkdownRenderer.INSTANCE
-            : CommonMarkRenderer.INSTANCE;
+   public static MarkdownRenderer getMarkdownRenderer(final Path sourcePath) {
+      final String configuredRenderer = STORE.getString(PREF_MARKDOWN_RENDERER);
+      if (MARKDOWN_RENDERER_GITHUB.equals(configuredRenderer))
+         return GitHubMarkdownRenderer.INSTANCE;
+
+      // Automatic mode is allow-list based: only a positive repository and ignore check may send source content off-machine.
+      if (MARKDOWN_RENDERER_GITHUB_AUTOMATIC.equals(configuredRenderer) && GitUtils.isFileEligibleForGitHubRendering(sourcePath))
+         return GitHubMarkdownRenderer.INSTANCE;
+
+      return CommonMarkRenderer.INSTANCE;
    }
 
    public static int getGithubApiResonseTimeout() {

@@ -31,8 +31,9 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
       final var parent = getFieldEditorParent();
 
       addField(new ComboFieldEditor(PluginPreferences.PREF_MARKDOWN_RENDERER, "Markdown Renderer:", new String[][] { //
-         {"CommonMark (= offline rendering)", "commonmark"}, //
-         {"GitHub Markdown API (= online rendering)", "github"} //
+         {"CommonMark (= offline rendering)", PluginPreferences.MARKDOWN_RENDERER_COMMONMARK}, //
+         {"GitHub Markdown API (= online rendering)", PluginPreferences.MARKDOWN_RENDERER_GITHUB}, //
+         {"Automatic (= GitHub API for non-ignored files in GitHub repositories)", PluginPreferences.MARKDOWN_RENDERER_GITHUB_AUTOMATIC} //
       }, parent));
 
       addField(new GroupFieldEditor("GitHub API", parent, group -> List.of( //
