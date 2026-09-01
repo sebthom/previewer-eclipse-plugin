@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -33,6 +34,7 @@ import de.sebthom.eclipse.previewer.cache.RenderCacheUsingSourceContentHash;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
 import de.sebthom.eclipse.previewer.ui.BrowserWrapper;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
+import de.sebthom.eclipse.previewer.util.StringUtils;
 import net.sf.jstuff.core.collection.LRUMap;
 import net.sf.jstuff.core.collection.tuple.Tuple2;
 import net.sf.jstuff.core.exception.Exceptions;
@@ -44,6 +46,8 @@ import net.sf.jstuff.core.functional.ThrowingFunction;
  * @author Sebastian Thomschke
  */
 public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
+
+   private static final Pattern HTML_TITLE_TAG_PATTERN = Pattern.compile("<title(?:\\s|>)", Pattern.CASE_INSENSITIVE);
 
    @FunctionalInterface
    public interface LocalFileLinkHandler {
@@ -201,11 +205,16 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       return pageState == null ? 1.0f : pageState.zoomLevel;
    }
 
+   private PageState getOrCreatePageState(final String pageStateKey) {
+      // TODO: Map.computeIfAbsent has a nullable return contract, but this mapping function always creates a PageState.
+      return asNonNull(pageStates.computeIfAbsent(pageStateKey, key -> new PageState()));
+   }
+
    @Override
    public synchronized void setZoom(final float level) {
       final var pageStateKey = currentPageStateKey;
       if (pageStateKey != null) {
-         final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
+         final var pageState = getOrCreatePageState(pageStateKey);
          pageState.zoomLevel = level;
          browser.setZoom(level);
       }
@@ -221,7 +230,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       }
 
       pageStateKey = currentPageStateKey = source.path().toString();
-      final var pageState = pageStates.computeIfAbsent(pageStateKey, k -> new PageState());
+      final var pageState = getOrCreatePageState(pageStateKey);
       currentRenderedContentPath = toCanonicalPath(renderedContentPath);
       browser.navigateTo(renderedContentPath, enableSvgSaving).thenRun(() -> {
          if (pageState.zoomLevel != 1.0f) {
@@ -301,8 +310,18 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       // add meta footer
       html.append("<!-- " + path.toUri() + " @ " + MiscUtils.getCurrentTime() + " -->");
 
-      // add <base> tag to be able to resolve relatively referenced images
       final var headEndPos = html.indexOf("</head>");
+
+      if (!HTML_TITLE_TAG_PATTERN.matcher(html).find()) {
+         final var sourceFileName = path.getFileName().toString();
+         final var extensionStart = sourceFileName.lastIndexOf('.');
+         // A leading dot belongs to a dotfile name; treating it as an extension would leave an empty print title.
+         final var documentTitle = extensionStart > 0 ? sourceFileName.substring(0, extensionStart) : sourceFileName;
+         // Chromium derives its Save as PDF filename from the title. Preserve renderer titles and escape filesystem text.
+         html.insert(headEndPos > -1 ? headEndPos : 0, "<title>" + StringUtils.htmlEscape(documentTitle) + "</title>");
+      }
+
+      // add <base> tag to be able to resolve relatively referenced images
       html.insert(headEndPos > -1 ? headEndPos : 0, "<base href='" + path.getParent().toUri() + "'>");
 
       // make # anchor tags work while having <base href> defined

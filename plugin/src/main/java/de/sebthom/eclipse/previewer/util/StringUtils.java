@@ -80,10 +80,16 @@ public final class StringUtils {
          #previewer_infobox * {
            color: #000000;
          }
-         #previewer_infobox.minimized {
-           width: 10px;
-         }
-         </style>
+          #previewer_infobox.minimized {
+            width: 10px;
+          }
+          @media print {
+            /* The info box is interactive preview chrome, not document content. */
+            #previewer_infobox {
+              display: none;
+            }
+          }
+          </style>
 
          <div id="previewer_infobox">
            <button style="border:none; padding:0px; background:none;"
@@ -112,7 +118,12 @@ public final class StringUtils {
           """;
    }
 
-   private static String htmlEscape(final String text) {
+   /**
+    * Escapes text for safe insertion into HTML text or attribute content.
+    *
+    * @param text plain text to escape
+    */
+   public static String htmlEscape(final String text) {
       final var escaped = new StringBuilder(text.length());
       for (int idx = 0; idx < text.length(); idx++) {
          switch (text.charAt(idx)) {
