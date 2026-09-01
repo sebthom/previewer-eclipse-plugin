@@ -29,6 +29,7 @@ The following formats are supported out of the box:
 - CSV and TSV files
 - [Draw.io](https://www.drawio.com/) diagrams
 - [GitHub flavored Markdown (GFM)](https://github.github.com/gfm/), including:
+    - Syntax highlighting for explicitly labelled fenced code blocks when using the local CommonMark renderer
     - [Mermaid](https://mermaid.js.org/) fenced blocks: `mermaid`
     - [Pikchr](https://pikchr.org/) fenced blocks: `pikchr`\
       The optional `center`, `float-left`, `float-right`, and `indent` layout modifiers are supported after the language name.
@@ -177,6 +178,8 @@ By default, **Graphviz DOT** files are rendered using a bundled version of [Viz.
 By default, **Markdown** files are rendered using a bundled version of [CommonMark Java](https://github.com/commonmark/commonmark-java), which is licensed under [BSD-2-Clause](https://github.com/commonmark/commonmark-java/blob/main/LICENSE.txt).
 
 Rendered **Markdown** files are styled using [GitHub MarkDown CSS](https://github.com/sindresorhus/github-markdown-css/), which is licensed under [MIT](https://github.com/sindresorhus/github-markdown-css/blob/main/license).
+
+Fenced code blocks in rendered **Markdown** files are highlighted using [Highlight.js](https://highlightjs.org/), which is licensed under the BSD 3-Clause license.
 
 TeX math in rendered **Markdown** files uses a bundled version of [MathJax](https://github.com/mathjax/MathJax), which is licensed under [Apache License 2.0](https://github.com/mathjax/MathJax/blob/master/LICENSE).
 

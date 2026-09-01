@@ -1,0 +1,11 @@
+Highlight.js 11.12.0
+
+highlight.min.js:
+https://github.com/highlightjs/cdn-release/blob/11.12.0/build/highlight.min.js
+Prebuilt common-language browser bundle.
+SHA-384: wjfDDhOPPdjtva8vWBhWeVprSpmxisEu5aYT3q1JyACqXpdKpo3PWZTMVq24MBix
+
+highlight.css:
+Adapted from:
+https://github.com/highlightjs/cdn-release/blob/11.12.0/build/styles/github.css
+https://github.com/highlightjs/cdn-release/blob/11.12.0/build/styles/github-dark.css

@@ -27,7 +27,8 @@ import de.sebthom.eclipse.previewer.util.MiscUtils;
 import de.sebthom.eclipse.previewer.util.StringUtils;
 
 /**
- * Renders Markdown through the configured engine and adds support for embedded diagrams and math.
+ * Renders Markdown through the configured engine and adds browser-side support for embedded diagrams, math, and CommonMark code
+ * highlighting.
  *
  * @author Sebastian Thomschke
  */
@@ -35,8 +36,34 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
 
    private File cssDark;
    private File cssLight;
+   private File highlightJSCSS;
+   private File highlightJS;
    private @Nullable File mathJaxJS;
    private File mermaidJS;
+
+   private static final String HIGHLIGHT_JS_INIT_SCRIPT = """
+      <script>
+      (function() {
+        if (typeof hljs === 'undefined' || typeof hljs.getLanguage !== 'function'
+            || typeof hljs.highlightElement !== 'function') return;
+
+        var codeBlocks = document.querySelectorAll('pre > code[class*="language-"]');
+        for (var blockIndex = 0; blockIndex < codeBlocks.length; blockIndex++) {
+          var codeBlock = codeBlocks[blockIndex];
+          var languageMatch = /(?:^|\\s)language-([^\\s]+)/.exec(codeBlock.className);
+          // Explicit fences are the contract. highlightAll() would also auto-detect and rewrite unlabelled blocks.
+          if (!languageMatch || !hljs.getLanguage(languageMatch[1])) continue;
+
+          try {
+            hljs.highlightElement(codeBlock);
+          } catch (error) {
+            // One malformed block must not prevent later blocks from being highlighted or make the preview unreadable.
+            if (typeof console !== 'undefined' && console.error) console.error(error);
+          }
+        }
+      })();
+      </script>
+      """;
 
    private static final String MERMAID_INIT_SCRIPT = """
       <script>
@@ -77,6 +104,8 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
    public MarkdownHtmlPreviewRenderer() throws IOException {
       cssDark = Plugin.resources().extract(Constants.MARKDOWN_CSS_DARK);
       cssLight = Plugin.resources().extract(Constants.MARKDOWN_CSS_LIGHT);
+      highlightJSCSS = Plugin.resources().extract(Constants.HIGHLIGHT_JS_CSS);
+      highlightJS = Plugin.resources().extract(Constants.HIGHLIGHT_JS);
       mermaidJS = de.sebthom.eclipse.previewer.mermaid.Plugin.resources().extract(
          de.sebthom.eclipse.previewer.mermaid.Constants.MERMAID_JS);
    }
@@ -140,10 +169,12 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       }
       preprocessedMarkdown.applyHtmlReplacements(htmlBody);
       final boolean containsMath = MathJaxSupport.containsMath(htmlBody);
+      // Check after rendering so GitHub API fallback receives the same local support as explicitly selected CommonMark.
+      final boolean isCommonMark = renderer instanceof CommonMarkRenderer;
 
       final var rendererName = isCommonMarkFallback //
             ? "CommonMark, GitHub Markdown API unavailable"
-            : renderer instanceof CommonMarkRenderer //
+            : isCommonMark //
                   ? "CommonMark"
                   : renderer instanceof GitHubMarkdownRenderer //
                         ? "GitHub Markdown API"
@@ -154,6 +185,11 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
       out.append("<head>");
       out.append("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>");
       out.append("<link rel='stylesheet' href='" + (useDarkTheme ? cssDark : cssLight).toURI() + "'>");
+      // GitHub API output already contains token markup; applying another highlighter would destroy that structure.
+      if (isCommonMark) {
+         out.append("<link rel='stylesheet' href='" + highlightJSCSS.toURI() + "'>");
+         out.append("<script src='" + highlightJS.toURI() + "'></script>");
+      }
       out.append("<style>* { tab-size: " + getPreferredTabSize() + " !important}</style>");
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append("<script src='" + mermaidJS.toURI() + "'></script>");
@@ -162,10 +198,14 @@ public class MarkdownHtmlPreviewRenderer implements HtmlPreviewRenderer {
          PikchrRendering.appendPageSupport(out);
       }
       out.append("</head>");
-      out.append("<body class='markdown-body' style='padding:5px'>\n\n");
+      out.append("<body class='markdown-body" + (useDarkTheme ? " previewer-dark" : "") + "' style='padding:5px'>\n\n");
       out.append(htmlBody);
       if (PluginPreferences.isRenderMermaidDiagrams()) {
          out.append(MERMAID_INIT_SCRIPT.replace("$$THEME$$", useDarkTheme ? "dark" : "default"));
+      }
+      if (isCommonMark) {
+         // Mermaid source is converted first so a diagram fence cannot also be rewritten as highlighted code.
+         out.append(HIGHLIGHT_JS_INIT_SCRIPT);
       }
       if (containsMath) {
          out.append(MathJaxSupport.createInitializationScript(getMathJaxJS()));

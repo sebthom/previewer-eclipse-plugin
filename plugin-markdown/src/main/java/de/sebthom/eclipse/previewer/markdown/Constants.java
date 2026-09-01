@@ -7,9 +7,13 @@
 package de.sebthom.eclipse.previewer.markdown;
 
 /**
+ * Defines bundle resource paths used by Markdown preview rendering.
+ *
  * @author Sebastian Thomschke
  */
 public interface Constants {
+   String HIGHLIGHT_JS = "src/main/resources/highlightjs/highlight.min.js";
+   String HIGHLIGHT_JS_CSS = "src/main/resources/highlightjs/highlight.css";
    String MARKDOWN_CSS_DARK = "src/main/resources/github-markdown-css/github-markdown-dark.css";
    String MARKDOWN_CSS_LIGHT = "src/main/resources/github-markdown-css/github-markdown-light.css";
    String MATHJAX_COLOR_JS = "src/main/resources/mathjax/input/tex/extensions/color.js";
