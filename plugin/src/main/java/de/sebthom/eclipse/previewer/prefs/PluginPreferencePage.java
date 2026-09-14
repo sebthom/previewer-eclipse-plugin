@@ -67,9 +67,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colContributor = new TableViewerColumn(tableViewer, SWT.NONE);
          colContributor.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public @Nullable String getText(final Object element) {
-               final var ce = (IConfigurationElement) element;
-               return ce.getContributor().getName();
+            public @Nullable String getText(final @Nullable Object element) {
+               return element instanceof final IConfigurationElement ce ? ce.getContributor().getName() : null;
             }
          });
          colContributor.getColumn().setText("Contributor ID");
@@ -77,11 +76,13 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colClass = new TableViewerColumn(tableViewer, SWT.NONE);
          colClass.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public @Nullable String getText(final Object element) {
-               final var ce = (IConfigurationElement) element;
-               final var contributor = ce.getContributor().getName();
-               final var renderer = asNonNull(ce.getAttribute("class"));
-               return Strings.removeStart(renderer, contributor);
+            public @Nullable String getText(final @Nullable Object element) {
+               if (element instanceof final IConfigurationElement ce) {
+                  final var contributor = ce.getContributor().getName();
+                  final var renderer = asNonNull(ce.getAttribute("class"));
+                  return Strings.removeStart(renderer, contributor);
+               }
+               return null;
             }
          });
          colClass.getColumn().setText("Renderer");
@@ -89,9 +90,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colFileExt = new TableViewerColumn(tableViewer, SWT.NONE);
          colFileExt.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public @Nullable String getText(final Object element) {
-               final var ce = (IConfigurationElement) element;
-               return ce.getAttribute("file-extensions");
+            public @Nullable String getText(final @Nullable Object element) {
+               return element instanceof final IConfigurationElement ce ? ce.getAttribute("file-extensions") : null;
             }
          });
          colFileExt.getColumn().setText("File Extensions");
@@ -99,9 +99,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colFileName = new TableViewerColumn(tableViewer, SWT.NONE);
          colFileName.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public @Nullable String getText(final Object element) {
-               final var ce = (IConfigurationElement) element;
-               return ce.getAttribute("file-names");
+            public @Nullable String getText(final @Nullable Object element) {
+               return element instanceof final IConfigurationElement ce ? ce.getAttribute("file-names") : null;
             }
          });
          colFileName.getColumn().setText("File Names");
@@ -109,9 +108,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colFilePatterns = new TableViewerColumn(tableViewer, SWT.NONE);
          colFilePatterns.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public @Nullable String getText(final Object element) {
-               final var ce = (IConfigurationElement) element;
-               return ce.getAttribute("file-patterns");
+            public @Nullable String getText(final @Nullable Object element) {
+               return element instanceof final IConfigurationElement ce ? ce.getAttribute("file-patterns") : null;
             }
          });
          colFilePatterns.getColumn().setText("File Patterns");
@@ -119,16 +117,18 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
          final var colFileContentTypes = new TableViewerColumn(tableViewer, SWT.NONE);
          colFileContentTypes.setLabelProvider(new ColumnLabelProvider() {
             @Override
-            public String getText(final Object element) {
-               final var contentTypes = new ArrayList<String>();
-               final var ce = (IConfigurationElement) element;
-               for (final var contentType : ce.getChildren("content-type")) {
-                  final var id = contentType.getAttribute("id");
-                  if (id != null && !id.isBlank()) {
-                     contentTypes.add(id);
+            public @Nullable String getText(final @Nullable Object element) {
+               if (element instanceof final IConfigurationElement ce) {
+                  final var contentTypes = new ArrayList<String>();
+                  for (final var contentType : ce.getChildren("content-type")) {
+                     final var id = contentType.getAttribute("id");
+                     if (id != null && !id.isBlank()) {
+                        contentTypes.add(id);
+                     }
                   }
+                  return Strings.join(contentTypes);
                }
-               return Strings.join(contentTypes);
+               return null;
             }
          });
          colFileContentTypes.getColumn().setText("Content Types");

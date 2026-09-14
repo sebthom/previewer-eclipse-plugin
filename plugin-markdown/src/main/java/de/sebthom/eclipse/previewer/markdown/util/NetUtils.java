@@ -35,8 +35,9 @@ public final class NetUtils {
       final var proxyService = getProxyService();
       if (proxyService != null) {
          for (final IProxyData proxyCfg : proxyService.select(uri)) {
-            if (proxyCfg.getType().equals(IProxyData.HTTP_PROXY_TYPE)) {
-               httpClientBuilder.proxy(ProxySelector.of(new InetSocketAddress(proxyCfg.getHost(), proxyCfg.getPort())));
+            final var proxyHost = proxyCfg.getHost();
+            if (proxyHost != null && proxyCfg.getType().equals(IProxyData.HTTP_PROXY_TYPE)) {
+               httpClientBuilder.proxy(ProxySelector.of(new InetSocketAddress(proxyHost, proxyCfg.getPort())));
                if (proxyCfg.isRequiresAuthentication()) {
                   httpClientBuilder.authenticator(new Authenticator() {
                      @Override
