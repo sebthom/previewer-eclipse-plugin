@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.ui;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.lateNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.nio.file.Path;
 
@@ -122,6 +122,8 @@ public final class PreviewEditor extends EditorPart {
          de.sebthom.eclipse.previewer.prefs.PluginPreferencePage.class.getName(), null, null).open());
 
       renderPane = PreviewComposite.forPreviewEditor(root, SWT.NONE);
+      renderPane.setSourceNavigator(new SourceNavigation(renderPane, () -> this, asNonNull(getEditorSite().getActionBars()
+         .getStatusLineManager())));
       renderPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
       renderPane.showMessage("Rendering preview...");
 

@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.FontDescriptor;
@@ -60,6 +61,8 @@ import de.sebthom.eclipse.previewer.api.ContentSource;
 import de.sebthom.eclipse.previewer.api.PreviewRenderer;
 
 /**
+ * Previews TextMate grammars using editable sample text and a selectable highlighting theme.
+ *
  * @author Sebastian Thomschke
  */
 public class TextMatePreviewRenderer implements PreviewRenderer {
@@ -128,6 +131,7 @@ public class TextMatePreviewRenderer implements PreviewRenderer {
    private @Nullable Font zoomedFont;
 
    private @Nullable ITheme selectedTheme;
+   private Composite previewSelectorContainer = lateNonNull();
    private Link themeLink = lateNonNull();
 
    private @Nullable Path lastPath;
@@ -226,6 +230,11 @@ public class TextMatePreviewRenderer implements PreviewRenderer {
    }
 
    @Override
+   public @NonNull Composite getPreviewSelectorContainer() {
+      return previewSelectorContainer;
+   }
+
+   @Override
    public float getZoom() {
       return zoom;
    }
@@ -235,10 +244,13 @@ public class TextMatePreviewRenderer implements PreviewRenderer {
       final var root = new Composite(parent, SWT.NONE);
       root.setLayout(GridLayoutFactory.fillDefaults().spacing(0, 0).numColumns(1).create());
 
-      // custom toolbar with right padding: link + spacer
       final var toolBar = new Composite(root, SWT.NONE);
       toolBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       toolBar.setLayout(GridLayoutFactory.fillDefaults().extendedMargins(0, 16, 0, 0).numColumns(2).create());
+
+      // The host fills this slot after init(); creating it here makes the left-to-right order explicit.
+      previewSelectorContainer = new Composite(toolBar, SWT.NONE);
+      previewSelectorContainer.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 
       themeLink = new Link(toolBar, SWT.NONE);
       themeLink.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));

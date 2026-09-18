@@ -1,0 +1,27 @@
+/*
+ * SPDX-FileCopyrightText: © Sebastian Thomschke and contributors.
+ * SPDX-FileContributor: Sebastian Thomschke
+ * SPDX-License-Identifier: EPL-2.0
+ * SPDX-ArtifactOfProjectHomePage: https://github.com/sebthom/previewer-eclipse-plugin
+ */
+
+/* Set readable JSON defaults for Eclipse's dark theme through the same definitions exposed in Colors and Fonts. */
+ColorDefinition#de-sebthom-eclipse-previewer-json-string {
+   color: #9cdc7c;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-number {
+   color: #79b8ff;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-boolean {
+   color: #c586c0;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-null {
+   color: #b0b0b0;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-summary {
+   color: #b0b0b0;
+}

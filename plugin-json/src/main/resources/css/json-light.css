@@ -1,0 +1,27 @@
+/*
+ * SPDX-FileCopyrightText: © Sebastian Thomschke and contributors.
+ * SPDX-FileContributor: Sebastian Thomschke
+ * SPDX-License-Identifier: EPL-2.0
+ * SPDX-ArtifactOfProjectHomePage: https://github.com/sebthom/previewer-eclipse-plugin
+ */
+
+/* Restore JSON color defaults when switching back from the dark theme. Match the fallback values in plugin.xml. */
+ColorDefinition#de-sebthom-eclipse-previewer-json-string {
+   color: #006400;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-number {
+   color: #005cc5;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-boolean {
+   color: #7f0055;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-null {
+   color: #666666;
+}
+
+ColorDefinition#de-sebthom-eclipse-previewer-json-summary {
+   color: #666666;
+}

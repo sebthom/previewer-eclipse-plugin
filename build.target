@@ -32,6 +32,18 @@
          <unit id="de.sebthom.eclipse.commons.feature.feature.group" version="0.0.0"/>
       </location>
 
+      <location includeDependencyDepth="direct" includeDependencyScopes="compile" includeSource="false" missingManifest="error" type="Maven">
+         <dependencies>
+            <dependency>
+               <!-- Jackson 3.2 adds hexadecimal number parsing support; the Maven artifact already contains its OSGi manifest. -->
+               <groupId>tools.jackson.core</groupId>
+               <artifactId>jackson-core</artifactId>
+               <version>3.2.2</version>
+               <type>jar</type>
+            </dependency>
+         </dependencies>
+      </location>
+
       <location includeDependencyDepth="infinite" includeDependencyScopes="compile" includeSource="false" missingManifest="generate" type="Maven">
          <dependencies>
             <dependency>

@@ -166,12 +166,16 @@
          class="de.sebthom.eclipse.previewer.prefs.PluginPreferencePage" />
    </extension>
 
+   <extension point="org.eclipse.ui.themes">
+      <themeElementCategory id="de.sebthom.eclipse.previewer" label="%PluginName" />
+   </extension>
+
 
    <!-- ===================================== -->
    <!-- Renderers                             -->
    <!-- ===================================== -->
    <extension point="de.sebthom.eclipse.previewer.renderers">
-      <previewRenderer class="de.sebthom.eclipse.previewer.renderer.html.ExtensibleHtmlPreviewRenderer" file-patterns="**/*" />
+      <previewRenderer name="Rendered Document" class="de.sebthom.eclipse.previewer.renderer.html.ExtensibleHtmlPreviewRenderer" file-patterns="**/*" />
       <htmlPreviewRenderer class="de.sebthom.eclipse.previewer.renderer.html.SvgPreviewRenderer" file-extensions="svg">
          <content-type id="text.xml.svg" />
       </htmlPreviewRenderer>

@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.ui;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.lateNonNull;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -130,6 +130,11 @@ public final class PreviewView extends ViewPart {
 
       parent.setLayout(new FillLayout());
       renderPane = PreviewComposite.forPreviewView(parent, SWT.NONE);
+      renderPane.setSourceNavigator(new SourceNavigation(renderPane, () -> {
+         // The linked editor can differ from the active editor while the preview is pinned.
+         final var context = linkedEditorContext;
+         return context == null ? null : context.editor;
+      }, asNonNull(getViewSite().getActionBars().getStatusLineManager())));
       renderPane.showMessage("Open a **supported** file in a text or compare editor to see a rendered preview here.");
 
       editorTextModifiedEventDispatcher.subscribe(this::onDocumentEdited);

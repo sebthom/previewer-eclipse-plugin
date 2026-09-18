@@ -53,6 +53,25 @@
          <sequence minOccurs="0" maxOccurs="unbounded">
             <element ref="content-type"/>
          </sequence>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  Display name in the Preview as chooser. Defaults to the implementation class's simple name.
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="fallback" type="boolean" default="false">
+            <annotation>
+               <documentation>
+                  When true, try this renderer after other previewRenderer contributions.
+                  This lets a general format preview yield to specialized renderers for the same files.
+                  Registry order is preserved within each group.
+               </documentation>
+            </annotation>
+         </attribute>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>

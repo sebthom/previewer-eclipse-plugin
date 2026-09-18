@@ -12,15 +12,21 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import net.sf.jstuff.core.Strings;
 
 /**
+ * A contributed renderer with its display name and declared source matching rules.
+ *
  * @author Sebastian Thomschke
  */
 public class PreviewRendererExtension<T> extends RenderSourceSupport {
 
    public final T renderer;
+   public final String name;
 
    @SuppressWarnings("unchecked")
    public PreviewRendererExtension(final IConfigurationElement config) throws CoreException {
       renderer = (T) config.createExecutableExtension("class");
+      final var configuredName = config.getAttribute("name");
+      // Names are optional so existing third-party contributions remain usable in the chooser.
+      name = configuredName == null || configuredName.isBlank() ? renderer.getClass().getSimpleName() : configuredName;
 
       for (final var contentType : config.getChildren("content-type")) {
          final var id = contentType.getAttribute("id");

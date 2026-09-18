@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <!-- ===================================== -->
+   <!-- Renderers                             -->
+   <!-- ===================================== -->
+   <extension point="de.sebthom.eclipse.previewer.renderers">
+      <previewRenderer name="JSON Tree" class="de.sebthom.eclipse.previewer.json.JsonPreviewRenderer" file-extensions="json,jsonc,json5" fallback="true" />
+   </extension>
+
+   <!-- ===================================== -->
+   <!-- Preferences                           -->
+   <!-- ===================================== -->
+   <extension point="org.eclipse.ui.themes">
+      <themeElementCategory id="de.sebthom.eclipse.previewer.json" label="%PluginName"
+         parentId="de.sebthom.eclipse.previewer" />
+      <!-- Match normal workbench trees and tables until the user chooses a JSON-specific font. -->
+      <fontDefinition id="de.sebthom.eclipse.previewer.json.font" label="Text font"
+         categoryId="de.sebthom.eclipse.previewer.json" defaultsTo="org.eclipse.ui.workbench.TREE_TABLE_FONT" />
+      <colorDefinition id="de.sebthom.eclipse.previewer.json.string" label="String values"
+         categoryId="de.sebthom.eclipse.previewer.json" value="0,128,0" />
+      <colorDefinition id="de.sebthom.eclipse.previewer.json.number" label="Number values"
+         categoryId="de.sebthom.eclipse.previewer.json" value="0,92,197" />
+      <colorDefinition id="de.sebthom.eclipse.previewer.json.boolean" label="Boolean values"
+         categoryId="de.sebthom.eclipse.previewer.json" value="127,0,85" />
+      <colorDefinition id="de.sebthom.eclipse.previewer.json.null" label="Null values"
+         categoryId="de.sebthom.eclipse.previewer.json" value="102,102,102" />
+      <colorDefinition id="de.sebthom.eclipse.previewer.json.summary" label="Container summaries"
+         categoryId="de.sebthom.eclipse.previewer.json" value="102,102,102" />
+   </extension>
+
+   <!-- CSS changes theme defaults; Eclipse retains ownership of user overrides and preference persistence. -->
+   <extension point="org.eclipse.e4.ui.css.swt.theme">
+      <stylesheet uri="src/main/resources/css/json-light.css">
+         <themeid refid="org.eclipse.e4.ui.css.theme.e4_default" />
+      </stylesheet>
+      <stylesheet uri="src/main/resources/css/json-dark.css">
+         <themeid refid="org.eclipse.e4.ui.css.theme.e4_dark" />
+      </stylesheet>
+   </extension>
+
+</plugin>

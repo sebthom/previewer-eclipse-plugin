@@ -43,6 +43,7 @@
       <module>plugin-d2</module>
       <module>plugin-drawio</module>
       <module>plugin-graphviz</module>
+      <module>plugin-json</module>
       <module>plugin-markdown</module>
       <module>plugin-mermaid</module>
       <module>plugin-pikchr</module>

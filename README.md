@@ -43,6 +43,7 @@ The following formats are supported out of the box:
       browser backend cannot run MathJax and displays the TeX source instead.
 - Graphviz [DOT](https://graphviz.org/doc/info/lang.html) diagrams
 - HTML
+- JSON, JSONC and JSON5 files with a filterable native tree preview (JSON5 support is best effort)
 - [Mermaid](https://mermaid.js.org/) diagrams
 - [Pikchr](https://pikchr.org/) diagrams\
   Pikchr is rendered locally with the bundled WebAssembly runtime when Eclipse uses a modern browser backend.\
@@ -52,6 +53,26 @@ The following formats are supported out of the box:
 - [Scalable Vector Graphics (SVG)](https://en.wikipedia.org/wiki/SVG)
 - Terrastruct [D2](https://d2lang.com/) diagrams (requires `d2` executable from https://github.com/terrastruct/d2/releases installed locally)
 - TextMate grammars (requires the [Eclipse TM4E](https://github.com/eclipse-tm4e/tm4e) plugin)
+
+When a file supports multiple previews, use **Preview as** in the Preview view or Preview Editor to choose one.
+For example, a TextMate `.tmLanguage.json` file can be shown as **TextMate Grammar** or **JSON Tree**.
+The choice is remembered per file while that view or editor remains open; **Automatic** restores the default selection.
+
+### JSON preview
+
+The JSON preview shows a read-only tree in both the Preview view and the Preview Editor.
+The preview offers filtering by key or value, colors for different value types, and actions to copy values,
+subtrees, or JSON Pointers.
+Double-click a key or value to select it in the source editor.
+Navigation is not available when previewing a compare editor.
+
+Fonts and colors can be customized under
+**General > Appearance > Colors and Fonts > Previewer > JSON**.
+
+Comments, trailing commas, hexadecimal numbers and common JSON5 syntax are accepted in `.json`, `.jsonc` and `.json5` files.
+JSON5 support is best effort; some syntax is unsupported or interpreted differently.
+Continued strings retain their line breaks in the preview and copied values.
+Copied subtrees preserve numeric spelling and can contain extended JSON syntax.
 
 ### Markdown rendering
 
@@ -81,6 +102,10 @@ To use another mode, select the **Markdown Renderer** on the **Preview > Markdow
 #### Graphviz
 
 ![](src/site/img/screen_graphviz.png)
+
+#### JSON
+
+![](src/site/img/screen_json.png)
 
 #### TextMate Grammar
 
@@ -122,6 +147,17 @@ for more details about extension points.
       <previewRenderer class="com.example.ConfigPreviewRenderer" file-extensions="cfg,ini" file-pattern="**/.cfg/_config_rc" file-names="CONFIG_RC" />
    </extension>
    ```
+
+For tree-based formats, extend
+[`AbstractTreePreviewRenderer`](plugin/src/main/java/de/sebthom/eclipse/previewer/api/AbstractTreePreviewRenderer.java).
+It provides filtering, tree actions, refresh handling, state restoration and source navigation.
+Subclasses supply their own parsed model, JFace providers, entry IDs, source ranges and presentation;
+see [`JsonPreviewRenderer`](plugin-json/src/main/java/de/sebthom/eclipse/previewer/json/JsonPreviewRenderer.java) for an example.
+
+Set a `previewRenderer`'s `name` attribute to its display name in the **Preview as** chooser.
+For a general-purpose `previewRenderer`, set `fallback="true"` to try it after specialized contributions in **Automatic** mode.
+The default is `false`.
+Registry order is preserved within each group.
 
 ## <a id="building"></a>Building from Sources
 
@@ -174,6 +210,9 @@ To build the project follow these steps:
 **Draw.io** diagrams are rendered using https://www.draw.io/js/viewer.min.js, which is licensed under [Apache License 2.0 ](https://github.com/jgraph/drawio/blob/dev/LICENSE).
 
 By default, **Graphviz DOT** files are rendered using a bundled version of [Viz.js](https://github.com/mdaines/viz-js), which is licensed under [MIT](https://github.com/mdaines/viz-js/blob/v3/LICENSE).
+
+**JSON** previews use [Jackson Core](https://github.com/FasterXML/jackson-core),
+which is licensed under [Apache License 2.0](https://github.com/FasterXML/jackson-core/blob/3.x/LICENSE).
 
 By default, **Markdown** files are rendered using a bundled version of [CommonMark Java](https://github.com/commonmark/commonmark-java), which is licensed under [BSD-2-Clause](https://github.com/commonmark/commonmark-java/blob/main/LICENSE.txt).
 
