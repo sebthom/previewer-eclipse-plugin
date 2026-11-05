@@ -25,11 +25,14 @@ public final class PluginPreferences {
 
       @Override
       public void initializeDefaultPreferences() {
+         STORE.setDefault(PREF_OPEN_WEB_LINKS_EXTERNALLY, false);
          STORE.setDefault(PREF_WINDOWS_WEBVIEW, "default");
       }
    }
 
    public static final IPersistentPreferenceStore STORE = Plugin.get().getPreferenceStore();
+
+   public static final String PREF_OPEN_WEB_LINKS_EXTERNALLY = "openWebLinksExternally";
 
    public static final String PREF_WINDOWS_WEBVIEW = "edge";
 
@@ -41,6 +44,10 @@ public final class PluginPreferences {
       if (SystemUtils.IS_OS_WINDOWS)
          return STORE.getString(PREF_WINDOWS_WEBVIEW);
       return "default";
+   }
+
+   public static boolean isOpenWebLinksExternally() {
+      return STORE.getBoolean(PREF_OPEN_WEB_LINKS_EXTERNALLY);
    }
 
    public static void removeListener(final IPropertyChangeListener listener) {

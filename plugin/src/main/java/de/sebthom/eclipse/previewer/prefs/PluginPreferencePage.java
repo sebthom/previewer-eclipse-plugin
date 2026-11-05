@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -34,7 +35,7 @@ import net.sf.jstuff.core.Strings;
 import net.sf.jstuff.core.SystemUtils;
 
 /**
- * Configures the core preview renderer, cache, editor, and Windows browser preferences.
+ * Configures the core preview renderer, cache, editor, and browser preferences.
  *
  * @author Sebastian Thomschke
  */
@@ -166,6 +167,9 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
    @Override
    protected void createFieldEditors() {
       final var parent = getFieldEditorParent();
+
+      addField(new BooleanFieldEditor(PluginPreferences.PREF_OPEN_WEB_LINKS_EXTERNALLY,
+         "Open HTTP and HTTPS links in the external web browser", parent));
 
       addField(new LabelFieldEditor("Previewer plugins:", parent));
       addField(new TableFieldEditor(parent, input -> //
