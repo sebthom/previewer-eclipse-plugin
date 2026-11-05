@@ -74,6 +74,15 @@ JSON5 support is best effort; some syntax is unsupported or interpreted differen
 Continued strings retain their line breaks in the preview and copied values.
 Copied subtrees preserve numeric spelling and can contain extended JSON syntax.
 
+### Opening web links
+
+Enable **Open HTTP and HTTPS links in the external web browser** on the **Previewer** preference page to open web links
+using the external browser configured under **General > Web Browser**. The option is disabled by default to preserve
+embedded navigation. Changes take effect on the next link click without restarting Eclipse.
+
+This is useful for sites that require an existing browser login or redirect through HTTP, which macOS App Transport
+Security can block in the embedded browser. Local file links and same-document anchors retain their existing behavior.
+
 ### Markdown rendering
 
 By default, Markdown previews are rendered locally with CommonMark for privacy: their source is not sent to the GitHub

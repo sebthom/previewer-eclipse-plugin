@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
@@ -31,6 +32,7 @@ import de.sebthom.eclipse.previewer.api.PreviewRenderer;
 import de.sebthom.eclipse.previewer.cache.RenderCache;
 import de.sebthom.eclipse.previewer.cache.RenderCacheByLastModified;
 import de.sebthom.eclipse.previewer.cache.RenderCacheUsingSourceContentHash;
+import de.sebthom.eclipse.previewer.prefs.PluginPreferences;
 import de.sebthom.eclipse.previewer.renderer.PreviewRendererExtension;
 import de.sebthom.eclipse.previewer.ui.BrowserWrapper;
 import de.sebthom.eclipse.previewer.util.MiscUtils;
@@ -102,8 +104,18 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    @Override
    public void init(final Composite parent) {
       browser = new BrowserWrapper(parent);
-      browser.setShouldOverrideNavigation(this::tryOpenLocalFileLink);
+      browser.setShouldOverrideNavigation(target -> LinkNavigation.handle(target, PluginPreferences.isOpenWebLinksExternally(),
+         this::openExternalWebLink, this::tryOpenLocalFileLink));
       loadRenderersFromExtensionPoints();
+   }
+
+   private void openExternalWebLink(final URI target) {
+      try {
+         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(target.toURL());
+      } catch (final CoreException | IOException ex) {
+         // Keep the preview visible even if the external browser could not be opened.
+         Plugin.log().error(ex);
+      }
    }
 
    private boolean tryOpenLocalFileLink(final URI target) {

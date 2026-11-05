@@ -130,21 +130,22 @@ public final class BrowserWrapper implements IDisposable {
             if (target == null)
                return;
 
+            final var shouldOverrideNavigation = BrowserWrapper.this.shouldOverrideNavigation;
+            try {
+               if (shouldOverrideNavigation != null && shouldOverrideNavigation.test(target)) {
+                  event.doit = false;
+                  return;
+               }
+            } catch (final RuntimeException ex) {
+               Plugin.log().warn(ex, "Cannot handle browser navigation to [" + target + "].");
+            }
+
             final var svgSavingDocument = BrowserWrapper.this.svgSavingDocument;
             if (svgSavingDocument != null && !isSameDocument(svgSavingDocument, target)) {
                // BrowserFunction registrations survive page loads. Revoke the native bridge before a trusted preview can
                // navigate to any other document, including navigation initiated by the preview's own JavaScript.
                BrowserWrapper.this.svgSavingDocument = null;
                setSvgSavingEnabled(false);
-            }
-
-            final var shouldOverrideNavigation = BrowserWrapper.this.shouldOverrideNavigation;
-            try {
-               if (shouldOverrideNavigation != null && shouldOverrideNavigation.test(target)) {
-                  event.doit = false;
-               }
-            } catch (final RuntimeException ex) {
-               Plugin.log().warn(ex, "Cannot handle browser navigation to [" + target + "].");
             }
          }
       });
