@@ -94,14 +94,20 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    private final Browser browser;
+   private final BrowserLinkListener webLinkListener;
    private final Clipboard clipboard;
    private @Nullable URI svgSavingDocument;
    private @Nullable BrowserFunction saveSvgFunction;
    private @Nullable Predicate<URI> shouldOverrideNavigation;
+   private @Nullable Predicate<URI> webLinkHandler;
 
    public BrowserWrapper(final Composite parent) {
       final var browser = this.browser = createBrowser(parent);
       clipboard = new Clipboard(parent.getDisplay());
+      webLinkListener = new BrowserLinkListener(browser, target -> {
+         final var handler = webLinkHandler;
+         return handler != null && handler.test(target);
+      }, ex -> Plugin.log().warn(ex, "Cannot handle browser web links."));
 
       // Workaround for Eclipse keybinding handling: Ctrl+C often triggers the workbench Copy command,
       // which does not propagate the embedded web selection to the system clipboard.
@@ -264,14 +270,31 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    /**
-    * Sets a callback that can override user-initiated browser navigation before the embedded browser follows the target
-    * URI.
+    * Sets a callback that can override browser navigation before the embedded browser follows the target URI.
+    * Navigation events include automatic page and frame loads, so this callback does not indicate a user link activation.
     * <p>
     * Return {@code true} when the target was handled elsewhere and the embedded browser should cancel its native
     * navigation. Return {@code false} to let the browser continue normally.
     */
    public void setShouldOverrideNavigation(final @Nullable Predicate<URI> shouldOverrideNavigation) {
       this.shouldOverrideNavigation = shouldOverrideNavigation;
+   }
+
+   /** Sets the HTTP(S) link handler; returning true cancels the link's embedded navigation. */
+   public void setWebLinkHandler(final @Nullable Predicate<URI> webLinkHandler) {
+      this.webLinkHandler = webLinkHandler;
+   }
+
+   /**
+    * Enables or disables HTTP(S) link handling for the current page and later loads. Handling starts once a page has loaded.
+    * While disabled, pages keep their native link behavior, including a page that received the handling earlier.
+    */
+   public void setWebLinksEnabled(final boolean enabled) {
+      UI.run(() -> {
+         if (!browser.isDisposed()) {
+            webLinkListener.setEnabled(enabled);
+         }
+      });
    }
 
    private String getSelectedText() {
@@ -415,6 +438,7 @@ public final class BrowserWrapper implements IDisposable {
 
    @Override
    public void dispose() {
+      webLinkListener.dispose();
       final var saveSvgFunction = this.saveSvgFunction;
       if (saveSvgFunction != null) {
          saveSvgFunction.dispose();

@@ -77,11 +77,25 @@ Copied subtrees preserve numeric spelling and can contain extended JSON syntax.
 ### Opening web links
 
 Enable **Open HTTP and HTTPS links in the external web browser** on the **Previewer** preference page to open web links
-using the external browser configured under **General > Web Browser**. The option is disabled by default to preserve
-embedded navigation. Changes take effect on the next link click without restarting Eclipse.
+using the external browser configured under **General > Web Browser**.
+The option is disabled by default to preserve embedded navigation.
+While it is disabled, links keep their native behavior.
+Changes take effect on the next link click without restarting Eclipse.
+
+Text links, SVG links, and client-side image-map links in the main document use this setting.
+Page click handlers can cancel navigation or change the destination.
+Form submissions, server-side image maps (`<img ismap>`), and direct URL changes made by page scripts retain their
+native navigation.
+If Eclipse does not pick up a link click, the link opens inside Preview instead.
+
+Previews gain external link handling once the page content is available.
+Clicks before that navigate inside Preview.
+Loading an embedded frame does not open an external browser.
+Links inside embedded frames retain their native navigation.
 
 This is useful for sites that require an existing browser login or redirect through HTTP, which macOS App Transport
-Security can block in the embedded browser. Local file links and same-document anchors retain their existing behavior.
+Security can block in the embedded browser.
+Local file links and same-document anchors retain their existing behavior.
 
 ### Markdown rendering
 
@@ -212,6 +226,15 @@ To build the project follow these steps:
 
 1. Run `mvn clean verify` in the project root directory. This will execute compilation, unit-testing, integration-testing and
    packaging of all artifacts.
+
+Native browser regression tests are opt-in because they require a graphical session and an installed browser runtime.
+On Windows, exclude the Linux and macOS SWT bundles from the test classpath:
+
+```sh
+mvn -pl plugin -am verify -Dpreviewer.tests.browser=edge "-Dmaven.test.dependency.excludes=*:org.eclipse.swt.gtk.*,*:org.eclipse.swt.cocoa.*"
+```
+
+Replace `edge` with `ie` to test Internet Explorer instead of WebView2.
 
 
 ## <a name="acknowledgement"></a>Acknowledgement
