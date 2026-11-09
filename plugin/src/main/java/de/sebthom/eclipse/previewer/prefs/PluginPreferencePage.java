@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.prefs;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +42,7 @@ import net.sf.jstuff.core.SystemUtils;
 public final class PluginPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
    private final class TableFieldEditor extends FieldEditor {
-      final GridData tableLayoutData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
+      final GridData tableLayoutData = new GridData(GridData.FILL, GridData.FILL, true, true, 1, 1);
       final IStructuredContentProvider contentProvider;
 
       TableFieldEditor(final Composite parent, final IStructuredContentProvider contentProvider) {
@@ -168,9 +168,6 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
    protected void createFieldEditors() {
       final var parent = getFieldEditorParent();
 
-      addField(new BooleanFieldEditor(PluginPreferences.PREF_OPEN_WEB_LINKS_EXTERNALLY,
-         "Open HTTP and HTTPS links in the external web browser", parent));
-
       addField(new LabelFieldEditor("Previewer plugins:", parent));
       addField(new TableFieldEditor(parent, input -> //
       Arrays.stream(Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS)) //
@@ -188,6 +185,8 @@ public final class PluginPreferencePage extends FieldEditorPreferencePage implem
                   "default"} //
             }, parent));
       }
+      addField(new BooleanFieldEditor(PluginPreferences.PREF_OPEN_WEB_LINKS_EXTERNALLY,
+         "Open HTTP and HTTPS links in the external web browser", parent));
    }
 
    @Override
