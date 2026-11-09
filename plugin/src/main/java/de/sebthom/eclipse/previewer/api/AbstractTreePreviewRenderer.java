@@ -138,7 +138,6 @@ public abstract class AbstractTreePreviewRenderer<Model> implements PreviewRende
    }
 
    @Override
-   @SuppressWarnings("null") // JFace's legacy widget and resource APIs do not consistently declare their null contracts.
    public final void init(final Composite parent) {
       root = new Composite(parent, SWT.NONE);
       root.setLayout(GridLayoutFactory.fillDefaults().create());
@@ -244,7 +243,6 @@ public abstract class AbstractTreePreviewRenderer<Model> implements PreviewRende
       navigator.navigateToSource(result.path, columnIndex + ":" + getElementId(selected));
    }
 
-   @SuppressWarnings("null") // Images returned by the resource manager are non-null.
    private void createTreeActions(final Composite parent, final TreeViewer targetViewer) {
       treeActions = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
       treeActions.setEnabled(false);
@@ -262,7 +260,6 @@ public abstract class AbstractTreePreviewRenderer<Model> implements PreviewRende
       Buttons.onSelected(collapseAll, targetViewer::collapseAll);
    }
 
-   @SuppressWarnings("null") // The fallback descriptor is always present.
    private static ImageDescriptor treeActionIcon(final String name) {
       final String path = "icons/full/elcl16/" + name;
       // Newer Eclipse versions provide SVG; the supported 4.29 target supplies PNG and @2x variants.
