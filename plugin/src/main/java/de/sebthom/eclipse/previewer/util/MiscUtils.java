@@ -78,10 +78,11 @@ public final class MiscUtils {
     * @param markdown the input string containing Markdown-formatted text
     */
    public static void setMarkdown(final StyledText styledText, final String markdown) {
+      // Named groups keep each branch bound to its own alternative when the pattern is edited.
       final var markdownDirectivesPattern = Pattern.compile("" //
-            + "\\*\\*(.*?)\\*\\*" + '|' // bold
-            + "```(.*?)```" + '|' // code block
-            + "`([^`]*)`"); // inline code
+            + "\\*\\*(?<bold>.*?)\\*\\*" + '|' // bold
+            + "```(?<block>.*?)```" + '|' // code block
+            + "`(?<code>[^`]*)`"); // inline code
 
       final var plainText = new StringBuilder();
       final var styleRanges = new ArrayList<StyleRange>();
@@ -90,21 +91,23 @@ public final class MiscUtils {
       while (markdownDirectivesMatcher.find()) {
          plainText.append(markdown, previousEndIndex, markdownDirectivesMatcher.start());
 
-         // Determine the style based on the matched group
          final var styleRange = new StyleRange();
          styleRange.start = plainText.length();
-         if (markdownDirectivesMatcher.group(1) != null) { // bold
-            plainText.append(markdownDirectivesMatcher.group(1));
-            styleRange.length = markdownDirectivesMatcher.group(1).length();
+         final @Nullable String bold = markdownDirectivesMatcher.group("bold");
+         final @Nullable String block = markdownDirectivesMatcher.group("block");
+         final @Nullable String code = markdownDirectivesMatcher.group("code");
+         if (bold != null) {
+            plainText.append(bold);
+            styleRange.length = bold.length();
             styleRange.fontStyle = SWT.BOLD;
-         } else if (markdownDirectivesMatcher.group(2) != null) { // code block
-            plainText.append(markdownDirectivesMatcher.group(2));
-            styleRange.length = markdownDirectivesMatcher.group(3).length();
+         } else if (block != null) {
+            plainText.append(block);
+            styleRange.length = block.length();
             styleRange.font = JFaceResources.getTextFont();
             styleRange.background = Colors.GRAY;
-         } else if (markdownDirectivesMatcher.group(3) != null) { // inline code
-            plainText.append(markdownDirectivesMatcher.group(3));
-            styleRange.length = markdownDirectivesMatcher.group(3).length();
+         } else if (code != null) {
+            plainText.append(code);
+            styleRange.length = code.length();
             styleRange.font = JFaceResources.getTextFont();
          }
          styleRanges.add(styleRange);
