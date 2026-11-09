@@ -19,15 +19,30 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.ui.services.IDisposable;
 
 import de.sebthom.eclipse.commons.ui.Colors;
 import de.sebthom.eclipse.commons.ui.UI;
+import de.sebthom.eclipse.previewer.Plugin;
 import net.sf.jstuff.core.graphic.RGB;
 
 /**
  * @author Sebastian Thomschke
  */
 public final class MiscUtils {
+
+   /**
+    * Disposes a contributed renderer, logging instead of propagating its failure so that the caller can still release
+    * the remaining renderers and its own resources. Linkage errors are included because a contribution's classes can
+    * become unresolvable while it is still referenced, for example after its bundle was updated or uninstalled.
+    */
+   public static void disposeOrLog(final IDisposable disposable) {
+      try {
+         disposable.dispose();
+      } catch (final RuntimeException | LinkageError ex) {
+         Plugin.log().error(ex);
+      }
+   }
 
    public static String getCurrentTime() {
       return LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));

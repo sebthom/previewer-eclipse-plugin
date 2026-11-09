@@ -98,10 +98,19 @@ final class PreviewComposite extends Composite {
    }
 
    private PreviewComposite(final Composite parent, final int style, final boolean openPreviewableLinksInPreviewEditor) {
+      this(parent, style, openPreviewableLinksInPreviewEditor, Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS));
+   }
+
+   /**
+    * Accepts the renderer contributions directly so tests can host renderers without a running extension registry.
+    */
+   PreviewComposite(final Composite parent, final int style, final boolean openPreviewableLinksInPreviewEditor,
+         final IConfigurationElement[] rendererConfigurations) {
       super(parent, style);
       this.openPreviewableLinksInPreviewEditor = openPreviewableLinksInPreviewEditor;
-      // Disposing a parent bypasses this class's dispose() override, but must still invalidate queued renders.
-      addDisposeListener(event -> renderRequests.incrementAndGet());
+      // Closing a view or editor disposes an ancestor, and SWT then releases this composite without calling dispose().
+      // SWT.Dispose still fires on every path, before the children are released, so renderers can unhook their controls.
+      addDisposeListener(event -> disposeRenderers());
       final var layout = new GridLayout(1, false);
       layout.marginWidth = 0;
       layout.marginHeight = 0;
@@ -125,7 +134,7 @@ final class PreviewComposite extends Composite {
       infoPanel.setCaret(null);
       rendererSelectors.put(infoPanel, rendererCombo);
 
-      loadRenderersFromExtensionPoints();
+      loadRenderers(rendererConfigurations);
       setRendererChoices(List.of(), null);
    }
 
@@ -141,14 +150,15 @@ final class PreviewComposite extends Composite {
       return combo;
    }
 
-   @Override
-   public void dispose() {
+   private void disposeRenderers() {
+      // Invalidates queued renders. A render already running inside a renderer may still finish concurrently.
       renderRequests.incrementAndGet();
       currentSource = null;
       selectedRenderers.clear();
-      renderers.keySet().forEach(ext -> ext.renderer.dispose());
+      final var disposing = List.copyOf(renderers.keySet());
+      // Cleared before the callbacks so that a renderer re-entering this host cannot cause a second disposal.
       renderers.clear();
-      super.dispose();
+      disposing.forEach(rendererExt -> MiscUtils.disposeOrLog(rendererExt.renderer));
    }
 
    @SuppressWarnings("all")
@@ -160,9 +170,9 @@ final class PreviewComposite extends Composite {
       return zoom.floatValue();
    }
 
-   private void loadRenderersFromExtensionPoints() {
+   private void loadRenderers(final IConfigurationElement[] rendererConfigurations) {
       final var configurations = new ArrayList<IConfigurationElement>();
-      Collections.addAll(configurations, Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS));
+      Collections.addAll(configurations, rendererConfigurations);
       // General format previews must yield to specialized contributions, such as a TextMate grammar stored as JSON.
       // Stable sorting preserves the existing registry order for all contributions in the same group.
       configurations.sort(Comparator.comparing(ce -> Boolean.parseBoolean(ce.getAttribute("fallback"))));

@@ -227,7 +227,8 @@ To build the project follow these steps:
 1. Run `mvn clean verify` in the project root directory. This will execute compilation, unit-testing, integration-testing and
    packaging of all artifacts.
 
-Native browser regression tests are opt-in because they require a graphical session and an installed browser runtime.
+Native SWT and browser regression tests are opt-in because they require a graphical session and, for the browser tests,
+an installed browser runtime.
 On Windows, exclude the Linux and macOS SWT bundles from the test classpath:
 
 ```sh

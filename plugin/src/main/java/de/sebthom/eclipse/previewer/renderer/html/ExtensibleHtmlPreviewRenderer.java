@@ -112,18 +112,19 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
    @Override
    public void init(final Composite parent) {
+      // Created first: it is the step most likely to fail, for example without a WebView2 runtime, and nothing needs
+      // releasing yet at that point.
       browser = new BrowserWrapper(parent);
       // Native navigation includes automatic frame loads; only link activation may open an external web browser.
       browser.setShouldOverrideNavigation(this::tryOpenLocalFileLink);
       browser.setWebLinkHandler(target -> LinkNavigation.handle(target, MiscUtils.toURI(browser.getUrl()), PluginPreferences
          .isOpenWebLinksExternally(), this::openExternalWebLink));
+      loadRenderersFromExtensionPoints();
+      // Registered last: the host does not call dispose() if init() fails, and the global preference store must never
+      // retain a preview that failed to open.
       PluginPreferences.addListener(onPreferenceChanged);
-      // Closing a preview disposes the parent widgets without calling dispose(). The preference store is global and must
-      // never retain a closed preview.
-      parent.addDisposeListener(event -> PluginPreferences.removeListener(onPreferenceChanged));
       // Apply the value only after registering: a change from another thread before registration would otherwise be lost.
       browser.setWebLinksEnabled(PluginPreferences.isOpenWebLinksExternally());
-      loadRenderersFromExtensionPoints();
    }
 
    private void openExternalWebLink(final URI target) {
@@ -221,9 +222,14 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    @Override
    public void dispose() {
       PluginPreferences.removeListener(onPreferenceChanged);
-      renderers.forEach(ext -> ext.renderer.dispose());
-      renderers.clear();
-      browser.dispose();
+      try {
+         // The list stays unmodified: a render already running on a background thread may still be iterating it.
+         renderers.forEach(ext -> MiscUtils.disposeOrLog(ext.renderer));
+         MiscUtils.disposeOrLog(passthroughHtmlRenderer.renderer);
+         MiscUtils.disposeOrLog(passthroughXmlRenderer.renderer);
+      } finally {
+         browser.dispose();
+      }
    }
 
    @Override

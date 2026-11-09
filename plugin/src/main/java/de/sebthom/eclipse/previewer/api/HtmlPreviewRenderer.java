@@ -17,4 +17,13 @@ import org.eclipse.ui.services.IDisposable;
  */
 public interface HtmlPreviewRenderer extends IDisposable {
    void renderToHtml(ContentSource source, Appendable out) throws IOException;
+
+   /**
+    * Releases the renderer's resources when the preview hosting it closes.
+    * The hosting browser renderer calls this once on the SWT thread; HTML renderers own no controls.
+    * A {@link #renderToHtml(ContentSource, Appendable)} call that is already running on a background thread may finish
+    * concurrently; do not block waiting for it.
+    */
+   @Override
+   void dispose();
 }

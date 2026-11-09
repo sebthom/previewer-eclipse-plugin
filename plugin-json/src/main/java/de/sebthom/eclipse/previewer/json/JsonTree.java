@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.json;
 
-import static java.util.Objects.*;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import tools.jackson.core.JacksonException;
@@ -65,7 +66,7 @@ final class JsonTree {
 
    private static final ObjectWriteContext COPY_CONTEXT = new ObjectWriteContext.Base() {
       @Override
-      public DefaultPrettyPrinter getPrettyPrinter() {
+      public @NonNullByDefault({}) DefaultPrettyPrinter getPrettyPrinter() {
          // Each generator needs its own stateful printer so nesting cannot leak between copies.
          // Preserve the existing layout, including compact empty containers, independently of the host OS.
          final var separators = Separators.createDefaultInstance().withObjectNameValueSpacing(Separators.Spacing.AFTER)
@@ -149,11 +150,14 @@ final class JsonTree {
       String serialize() {
          final var out = new StringWriter();
          try (var writer = JSON.createGenerator(COPY_CONTEXT, out)) {
-            write(writer);
+            if (writer != null) {
+               write(writer);
+            }
          }
          return out.toString();
       }
 
+      @SuppressWarnings("resource")
       private void write(final JsonGenerator writer) {
          switch (type) {
             case START_OBJECT -> {

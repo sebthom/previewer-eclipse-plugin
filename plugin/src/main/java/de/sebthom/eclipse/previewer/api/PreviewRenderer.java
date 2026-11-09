@@ -75,4 +75,15 @@ public interface PreviewRenderer extends IDisposable {
     * @param level 1.0f means no zoom
     */
    void setZoom(float level);
+
+   /**
+    * Releases the renderer's resources when its preview closes.
+    * The host calls this once on the SWT thread, before it releases the controls created in {@link #init(Composite)},
+    * so implementations can still detach listeners and fonts from them. It is not called if {@link #init(Composite)} failed.
+    * An implementation that also calls this from its own dispose listeners must make it idempotent.
+    * A {@link #render(ContentSource, boolean)} call that is already running on a background thread may finish concurrently;
+    * do not block waiting for it, since rendering may itself wait for the SWT thread.
+    */
+   @Override
+   void dispose();
 }

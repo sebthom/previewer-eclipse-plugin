@@ -6,7 +6,7 @@
  */
 package de.sebthom.eclipse.previewer.json;
 
-import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -63,7 +63,8 @@ final class JsonPreviewAppearance {
       theme.getFontRegistry().addListener(registryListener);
       themeManager.addPropertyChangeListener(themeListener);
       viewer.getTree().getDisplay().addListener(SWT.Settings, settingsListener);
-      // Parent disposal can bypass PreviewRenderer.dispose(); global registries must never retain a closed preview.
+      // The tree's lifetime, not the renderer's, bounds these global registrations: a host that disposes the controls without
+      // calling PreviewRenderer.dispose() must not leave a closed preview reachable. Repeated cleanup is a no-op.
       viewer.getTree().addDisposeListener(event -> dispose());
       applyZoom();
    }
