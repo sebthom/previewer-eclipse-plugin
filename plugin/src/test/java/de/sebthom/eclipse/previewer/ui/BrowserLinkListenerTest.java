@@ -27,7 +27,6 @@ import java.util.function.BooleanSupplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.BrowserFunction;
 import org.eclipse.swt.browser.ProgressListener;
@@ -115,19 +114,7 @@ class BrowserLinkListenerTest {
       root = "http://127.0.0.1:" + server.getAddress().getPort();
       final var display = this.display = new Display();
       final var shell = this.shell = new Shell(display);
-      final var engine = System.getProperty("previewer.tests.browser");
-      int style = "edge".equals(engine) ? SWT.EDGE : SWT.NONE;
-      if ("ie".equals(engine)) {
-         try {
-            style = SWT.class.getField("IE").getInt(null);
-         } catch (final NoSuchFieldException ex) {
-            // SWT releases before the explicit IE style select it with SWT.NONE.
-         }
-      }
-      browser = new Browser(shell, style);
-      if (!"default".equals(engine)) {
-         assertEquals(engine, browser.getBrowserType());
-      }
+      browser = BrowserTestSupport.createBrowser(shell);
       browser.addProgressListener(ProgressListener.completedAdapter(event -> loaded = true));
       final var listener = this.listener = new BrowserLinkListener(browser, target -> enabled && !embeddedTargets.contains(target) && opened
          .add(target), errors::add);
@@ -666,12 +653,6 @@ class BrowserLinkListenerTest {
    }
 
    private void await(final BooleanSupplier condition) throws Exception {
-      final long deadline = System.nanoTime() + 12_000_000_000L;
-      while (!condition.getAsBoolean() && System.nanoTime() < deadline) {
-         if (display != null && !display.readAndDispatch()) {
-            Thread.sleep(10);
-         }
-      }
-      assertTrue(condition.getAsBoolean(), "Timed out waiting for native browser behavior");
+      BrowserTestSupport.await(asNonNull(display), condition);
    }
 }

@@ -102,8 +102,15 @@ public final class BrowserWrapper implements IDisposable {
    private @Nullable Predicate<URI> webLinkHandler;
 
    public BrowserWrapper(final Composite parent) {
-      final var browser = this.browser = createBrowser(parent);
-      clipboard = new Clipboard(parent.getDisplay());
+      this(createBrowser(parent));
+   }
+
+   /**
+    * Wraps a browser created by the caller, so tests can choose the engine without the plugin's preference store.
+    */
+   BrowserWrapper(final Browser browser) {
+      this.browser = browser;
+      clipboard = new Clipboard(browser.getDisplay());
       webLinkListener = new BrowserLinkListener(browser, target -> {
          final var handler = webLinkHandler;
          return handler != null && handler.test(target);
@@ -132,22 +139,24 @@ public final class BrowserWrapper implements IDisposable {
       browser.addLocationListener(new LocationAdapter() {
          @Override
          public void changing(final LocationEvent event) {
-            final URI target = MiscUtils.toURI(event.location);
-            if (target == null)
-               return;
-
-            final var shouldOverrideNavigation = BrowserWrapper.this.shouldOverrideNavigation;
-            try {
-               if (shouldOverrideNavigation != null && shouldOverrideNavigation.test(target)) {
-                  event.doit = false;
-                  return;
+            final var targetURI = MiscUtils.toURI(event.location);
+            if (targetURI != null) {
+               final var shouldOverrideNavigation = BrowserWrapper.this.shouldOverrideNavigation;
+               try {
+                  if (shouldOverrideNavigation != null && shouldOverrideNavigation.test(targetURI)) {
+                     // A cancelled navigation keeps the current document, so its bridge stays valid.
+                     event.doit = false;
+                     return;
+                  }
+               } catch (final RuntimeException ex) {
+                  Plugin.log().warn(ex, "Cannot handle browser navigation to [" + targetURI + "].");
                }
-            } catch (final RuntimeException ex) {
-               Plugin.log().warn(ex, "Cannot handle browser navigation to [" + target + "].");
             }
 
             final var svgSavingDocument = BrowserWrapper.this.svgSavingDocument;
-            if (svgSavingDocument != null && !isSameDocument(svgSavingDocument, target)) {
+            // Browsers accept locations that java.net.URI rejects, such as a literal '|' in a query. Such a location is never
+            // the trusted preview, which always comes from Path.toUri(), so it must revoke the bridge as well.
+            if (svgSavingDocument != null && (targetURI == null || !isSameDocument(svgSavingDocument, targetURI))) {
                // BrowserFunction registrations survive page loads. Revoke the native bridge before a trusted preview can
                // navigate to any other document, including navigation initiated by the preview's own JavaScript.
                BrowserWrapper.this.svgSavingDocument = null;
@@ -158,6 +167,12 @@ public final class BrowserWrapper implements IDisposable {
    }
 
    private boolean saveSvg(final Object[] arguments) {
+      // Navigation events can be missed or arrive out of order, for example when a load that started before a navigation
+      // completes after it. Authorize each call against the document that is shown now instead of relying on revocation.
+      if (!isShowing(svgSavingDocument)) {
+         Plugin.log().warn("Ignoring an SVG download request from a document that is not the generated preview.");
+         return false;
+      }
       if (arguments.length != 1 || !(arguments[0] instanceof final String svgContent)) {
          Plugin.log().warn("Ignoring an invalid SVG download request from the preview browser.");
          return false;
@@ -260,6 +275,14 @@ public final class BrowserWrapper implements IDisposable {
          }
          throw ex;
       }
+   }
+
+   /**
+    * @return true if the browser currently shows the given document; a location that java.net.URI rejects never matches
+    */
+   private boolean isShowing(final @Nullable URI document) {
+      final var shown = MiscUtils.toURI(browser.getUrl());
+      return document != null && shown != null && isSameDocument(document, shown);
    }
 
    private static boolean isSameDocument(final URI left, final URI right) {
@@ -368,8 +391,7 @@ public final class BrowserWrapper implements IDisposable {
             @Override
             public void completed(final ProgressEvent event) {
                browser.removeProgressListener(this);
-               final URI loadedDocument = MiscUtils.toURI(browser.getUrl());
-               if (svgSavingTarget != null && loadedDocument != null && isSameDocument(svgSavingTarget, loadedDocument)) {
+               if (isShowing(svgSavingTarget)) {
                   svgSavingDocument = svgSavingTarget;
                   setSvgSavingEnabled(true);
                }
