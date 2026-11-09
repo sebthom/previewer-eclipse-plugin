@@ -57,6 +57,7 @@ class BrowserLinkListenerTest {
    Path directory = lateNonNull();
 
    private final List<URI> opened = new ArrayList<>();
+   private final List<String> openedLocations = new ArrayList<>();
    private final Set<URI> embeddedTargets = new HashSet<>();
    private final List<RuntimeException> errors = new ArrayList<>();
    private final AtomicInteger frameRequests = new AtomicInteger();
@@ -116,8 +117,13 @@ class BrowserLinkListenerTest {
       final var shell = this.shell = new Shell(display);
       browser = BrowserTestSupport.createBrowser(shell);
       browser.addProgressListener(ProgressListener.completedAdapter(event -> loaded = true));
-      final var listener = this.listener = new BrowserLinkListener(browser, target -> enabled && !embeddedTargets.contains(target) && opened
-         .add(target), errors::add);
+      final var listener = this.listener = new BrowserLinkListener(browser, (target, location) -> {
+         if (!enabled || embeddedTargets.contains(target))
+            return false;
+         opened.add(target);
+         openedLocations.add(location);
+         return true;
+      }, errors::add);
       listener.setEnabled(true);
    }
 
@@ -354,6 +360,21 @@ class BrowserLinkListenerTest {
       click("link");
       await(() -> opened.size() == 1);
       assertEquals(URI.create(root + "/image-map"), opened.get(0));
+      assertEquals(currentUrl, browser.getUrl());
+      assertTrue(errors.isEmpty(), errors::toString);
+   }
+
+   @Test
+   void opensLinksWithCharactersThatJavaUriRejects() throws Exception {
+      // Browsers keep '|' literal in a query and fragment, which java.net.URI rejects. The parsed target must not encode the
+      // existing escape again, and the handler must also receive the location exactly as clicked.
+      final String location = root + "/search?q=a|b&path=%2F#view|details";
+      loadInteractivePage("<a id='link' href='" + location + "'>Search</a>", "");
+      final String currentUrl = browser.getUrl();
+      click("link");
+      await(() -> opened.size() == 1);
+      assertEquals(URI.create(root + "/search?q=a%7Cb&path=%2F#view%7Cdetails"), opened.get(0));
+      assertEquals(List.of(location), openedLocations);
       assertEquals(currentUrl, browser.getUrl());
       assertTrue(errors.isEmpty(), errors::toString);
    }

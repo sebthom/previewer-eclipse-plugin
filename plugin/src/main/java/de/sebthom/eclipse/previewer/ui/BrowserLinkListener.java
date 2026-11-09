@@ -6,8 +6,8 @@
 package de.sebthom.eclipse.previewer.ui;
 
 import java.net.URI;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.browser.Browser;
@@ -246,7 +246,7 @@ final class BrowserLinkListener {
    private static final String DISABLE_SCRIPT = "document.__previewerWebLinksEnabled = false;";
 
    private final Browser browser;
-   private final Predicate<URI> handler;
+   private final BiPredicate<URI, String> handler;
    private final Consumer<RuntimeException> onError;
    private final LocationListener locationListener;
    private final ProgressListener progressListener;
@@ -256,7 +256,11 @@ final class BrowserLinkListener {
    // Removing the listeners cannot cancel a queue check already scheduled with asyncExec.
    private boolean disposed;
 
-   BrowserLinkListener(final Browser browser, final Predicate<URI> handler, final Consumer<RuntimeException> onError) {
+   /**
+    * @param handler receives the parsed target for policy checks and the location as the browser serialized it. Returns true
+    *           if it handled the link, which cancels the embedded navigation.
+    */
+   BrowserLinkListener(final Browser browser, final BiPredicate<URI, String> handler, final Consumer<RuntimeException> onError) {
       this.browser = browser;
       this.handler = handler;
       this.onError = onError;
@@ -286,7 +290,7 @@ final class BrowserLinkListener {
    }
 
    private boolean openLink(final String location) {
-      final URI target = MiscUtils.toURI(location);
+      final URI target = MiscUtils.toBrowserURI(location);
       if (target == null)
          return false;
       final String scheme = target.getScheme();
@@ -294,7 +298,7 @@ final class BrowserLinkListener {
       if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme))
          return false;
       try {
-         return handler.test(target);
+         return handler.test(target, location);
       } catch (final RuntimeException ex) {
          onError.accept(ex);
          return false;

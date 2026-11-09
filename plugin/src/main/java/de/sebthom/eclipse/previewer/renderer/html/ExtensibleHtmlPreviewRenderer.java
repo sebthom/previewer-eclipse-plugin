@@ -10,6 +10,7 @@ import static net.sf.jstuff.core.validation.NullAnalysisHelper.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -117,8 +118,10 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       browser = new BrowserWrapper(parent);
       // Native navigation includes automatic frame loads; only link activation may open an external web browser.
       browser.setShouldOverrideNavigation(this::tryOpenLocalFileLink);
-      browser.setWebLinkHandler(target -> LinkNavigation.handle(target, MiscUtils.toURI(browser.getUrl()), PluginPreferences
-         .isOpenWebLinksExternally(), this::openExternalWebLink));
+      // Link targets are parsed leniently, so the current location must be too. Otherwise, the same-document check sees no
+      // current document on a page whose URL java.net.URI rejects, and its anchors would open externally.
+      browser.setWebLinkHandler((target, location) -> LinkNavigation.handle(target, MiscUtils.toBrowserURI(browser.getUrl()),
+         PluginPreferences.isOpenWebLinksExternally(), checkedTarget -> openExternalWebLink(location)));
       loadRenderersFromExtensionPoints();
       // Registered last: the host does not call dispose() if init() fails, and the global preference store must never
       // retain a preview that failed to open.
@@ -127,9 +130,15 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
       browser.setWebLinksEnabled(PluginPreferences.isOpenWebLinksExternally());
    }
 
-   private void openExternalWebLink(final URI target) {
+   /**
+    * @param location an HTTP(S) location as the embedded browser serialized it, already checked through its parsed URI
+    */
+   private void openExternalWebLink(final String location) {
       try {
-         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(target.toURL());
+         // Launch the location as clicked rather than the parsed URI. Parsing may percent-encode characters such as a '|' in
+         // the fragment, and pages read location.hash without decoding it, so client-side routing could change.
+         // java.net.URL accepts these characters as they are.
+         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(location));
       } catch (final CoreException | IOException ex) {
          // Keep the preview visible even if the external browser could not be opened.
          Plugin.log().error(ex);

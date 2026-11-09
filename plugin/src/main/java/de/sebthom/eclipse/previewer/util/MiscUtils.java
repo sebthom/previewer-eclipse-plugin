@@ -8,9 +8,11 @@ package de.sebthom.eclipse.previewer.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,8 @@ import net.sf.jstuff.core.graphic.RGB;
  * @author Sebastian Thomschke
  */
 public final class MiscUtils {
+
+   private static final String HEX_DIGITS = "0123456789ABCDEF";
 
    /**
     * Disposes a contributed renderer, logging instead of propagating its failure so that the caller can still release
@@ -129,6 +133,71 @@ public final class MiscUtils {
       } catch (final IllegalArgumentException | URISyntaxException ex) {
          return null;
       }
+   }
+
+   /**
+    * Parses a URL as serialized by the embedded browser, for example a link's {@code href} or the current page location.
+    * <p>
+    * Browsers follow the WHATWG URL standard, which keeps some characters literal that {@link URI} rejects, such as a
+    * {@code |} in a query. If strict parsing fails, such characters are percent-encoded in the path, query and fragment.
+    * Valid escapes are kept, so already encoded data is not encoded again. The scheme and authority are never altered;
+    * a URL whose authority {@link URI} rejects stays unparsable.
+    * <p>
+    * This is not a WHATWG parser. It relies on the browser's serialization, which already converted backslashes in
+    * HTTP(S) paths to slashes and removed tabs and newlines. Use {@link #toURI} where a rejected location must fail closed.
+    */
+   public static @Nullable URI toBrowserURI(final @Nullable String url) {
+      final URI strict = toURI(url);
+      if (strict != null || url == null)
+         return strict;
+
+      final int schemeEnd = url.indexOf(':');
+      if (schemeEnd < 1)
+         return null;
+      int repairStart = schemeEnd + 1;
+      if (url.startsWith("//", repairStart)) {
+         repairStart += 2;
+         while (repairStart < url.length() && "/?#".indexOf(url.charAt(repairStart)) < 0) {
+            repairStart++;
+         }
+      }
+
+      final var repaired = new StringBuilder(url.length() + 16).append(url, 0, repairStart);
+      boolean inQuery = false;
+      boolean inFragment = false;
+      for (int index = repairStart; index < url.length();) {
+         final int codePoint = url.codePointAt(index);
+         if (codePoint == '#' && !inFragment) {
+            inFragment = true;
+            repaired.append('#');
+         } else if (codePoint == '?' && !inQuery && !inFragment) {
+            inQuery = true;
+            repaired.append('?');
+         } else if (isLiteralURIChar(url, index, inQuery || inFragment)) {
+            repaired.append((char) codePoint);
+         } else {
+            for (final byte octet : new String(Character.toChars(codePoint)).getBytes(StandardCharsets.UTF_8)) {
+               repaired.append('%').append(HEX_DIGITS.charAt(octet >> 4 & 0xF)).append(HEX_DIGITS.charAt(octet & 0xF));
+            }
+         }
+         index += Character.charCount(codePoint);
+      }
+      return toURI(repaired.toString());
+   }
+
+   /**
+    * @return true if {@link URI} accepts the character at the given index literally in a path, or in a query or fragment
+    */
+   private static boolean isLiteralURIChar(final String url, final int index, final boolean inQueryOrFragment) {
+      final char ch = url.charAt(index);
+      if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || "-._~!$&'()*+,;=:@/?".indexOf(ch) >= 0)
+         return true;
+      // java.net.URI follows RFC 2732, which permits brackets in queries and fragments but not in paths.
+      if (ch == '[' || ch == ']')
+         return inQueryOrFragment;
+      if (ch == '%')
+         return index + 2 < url.length() && HexFormat.isHexDigit(url.charAt(index + 1)) && HexFormat.isHexDigit(url.charAt(index + 2));
+      return false;
    }
 
    public static URI withoutFragment(final URI target) {

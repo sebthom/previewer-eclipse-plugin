@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import javax.xml.XMLConstants;
@@ -99,7 +100,7 @@ public final class BrowserWrapper implements IDisposable {
    private @Nullable URI svgSavingDocument;
    private @Nullable BrowserFunction saveSvgFunction;
    private @Nullable Predicate<URI> shouldOverrideNavigation;
-   private @Nullable Predicate<URI> webLinkHandler;
+   private @Nullable BiPredicate<URI, String> webLinkHandler;
 
    public BrowserWrapper(final Composite parent) {
       this(createBrowser(parent));
@@ -111,9 +112,9 @@ public final class BrowserWrapper implements IDisposable {
    BrowserWrapper(final Browser browser) {
       this.browser = browser;
       clipboard = new Clipboard(browser.getDisplay());
-      webLinkListener = new BrowserLinkListener(browser, target -> {
+      webLinkListener = new BrowserLinkListener(browser, (target, location) -> {
          final var handler = webLinkHandler;
-         return handler != null && handler.test(target);
+         return handler != null && handler.test(target, location);
       }, ex -> Plugin.log().warn(ex, "Cannot handle browser web links."));
 
       // Workaround for Eclipse keybinding handling: Ctrl+C often triggers the workbench Copy command,
@@ -303,8 +304,13 @@ public final class BrowserWrapper implements IDisposable {
       this.shouldOverrideNavigation = shouldOverrideNavigation;
    }
 
-   /** Sets the HTTP(S) link handler; returning true cancels the link's embedded navigation. */
-   public void setWebLinkHandler(final @Nullable Predicate<URI> webLinkHandler) {
+   /**
+    * Sets the HTTP(S) link handler; returning true cancels the link's embedded navigation.
+    * <p>
+    * The handler receives the parsed target for policy checks and the location as the browser serialized it. The parsed
+    * target may percent-encode characters that the browser keeps literal, see {@link MiscUtils#toBrowserURI}.
+    */
+   public void setWebLinkHandler(final @Nullable BiPredicate<URI, String> webLinkHandler) {
       this.webLinkHandler = webLinkHandler;
    }
 

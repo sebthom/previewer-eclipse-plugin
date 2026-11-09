@@ -7,6 +7,7 @@
  */
 package de.sebthom.eclipse.previewer.renderer.html;
 
+import static net.sf.jstuff.core.validation.NullAnalysisHelper.asNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URI;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import de.sebthom.eclipse.previewer.util.MiscUtils;
 
 /**
  * Checks HTTP(S) link routing and which targets remain with native browser navigation.
@@ -73,6 +76,14 @@ class LinkNavigationTest {
             assertTrue(opened.isEmpty());
          }
       }
+   }
+
+   @Test
+   void retainsWebAnchorsOnPagesWhoseLocationNeedsRepair() {
+      // The renderer parses both the current location and the link target as browser URLs.
+      final URI currentDocument = asNonNull(MiscUtils.toBrowserURI("https://example.org/search?q=a|b"));
+      final URI target = asNonNull(MiscUtils.toBrowserURI("https://example.org/search?q=a|b#section"));
+      assertFalse(LinkNavigation.handle(target, currentDocument, true, uri -> fail("Same-document anchors must stay embedded")));
    }
 
    @Test
