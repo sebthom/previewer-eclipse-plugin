@@ -21,9 +21,11 @@ import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
+import de.sebthom.eclipse.commons.ui.UI;
 import de.sebthom.eclipse.previewer.Constants;
 import de.sebthom.eclipse.previewer.Plugin;
 import de.sebthom.eclipse.previewer.api.ContentSource;
@@ -81,6 +83,13 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    private BrowserWrapper browser = lateNonNull();
    private @Nullable LocalFileLinkHandler localFileLinkHandler;
    private @Nullable Path currentRenderedContentPath;
+   private final IPropertyChangeListener onPreferenceChanged = event -> {
+      if (PluginPreferences.PREF_OPEN_WEB_LINKS_EXTERNALLY.equals(event.getProperty())) {
+         // The event arrives on the thread that changed the value. Read the value on the UI thread, where updates apply in
+         // order, so a delayed update cannot restore an outdated value.
+         UI.run(() -> browser.setWebLinksEnabled(PluginPreferences.isOpenWebLinksExternally()));
+      }
+   };
 
    private void loadRenderersFromExtensionPoints() {
       for (final IConfigurationElement ce : Plugin.getExtensionConfigurations(Constants.EXTENSION_POINT_RENDERERS)) {
@@ -104,8 +113,16 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
    @Override
    public void init(final Composite parent) {
       browser = new BrowserWrapper(parent);
-      browser.setShouldOverrideNavigation(target -> LinkNavigation.handle(target, PluginPreferences.isOpenWebLinksExternally(),
-         this::openExternalWebLink, this::tryOpenLocalFileLink));
+      // Native navigation includes automatic frame loads; only link activation may open an external web browser.
+      browser.setShouldOverrideNavigation(this::tryOpenLocalFileLink);
+      browser.setWebLinkHandler(target -> LinkNavigation.handle(target, MiscUtils.toURI(browser.getUrl()), PluginPreferences
+         .isOpenWebLinksExternally(), this::openExternalWebLink));
+      PluginPreferences.addListener(onPreferenceChanged);
+      // Closing a preview disposes the parent widgets without calling dispose(). The preference store is global and must
+      // never retain a closed preview.
+      parent.addDisposeListener(event -> PluginPreferences.removeListener(onPreferenceChanged));
+      // Apply the value only after registering: a change from another thread before registration would otherwise be lost.
+      browser.setWebLinksEnabled(PluginPreferences.isOpenWebLinksExternally());
       loadRenderersFromExtensionPoints();
    }
 
@@ -203,6 +220,7 @@ public class ExtensibleHtmlPreviewRenderer implements PreviewRenderer {
 
    @Override
    public void dispose() {
+      PluginPreferences.removeListener(onPreferenceChanged);
       renderers.forEach(ext -> ext.renderer.dispose());
       renderers.clear();
       browser.dispose();
