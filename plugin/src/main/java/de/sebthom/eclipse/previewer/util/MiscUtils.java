@@ -35,6 +35,20 @@ public final class MiscUtils {
 
    private static final String HEX_DIGITS = "0123456789ABCDEF";
 
+   private static final Pattern MARKDOWN_SPECIAL_CHAR_PATTERN = Pattern.compile("[\\\\*`]");
+   private static final Pattern MARKDOWN_ESCAPE_PATTERN = Pattern.compile("\\\\([\\\\*`])");
+
+   /**
+    * Each directive's content consumes an escape as one atomic unit, so an escaped delimiter cannot close it. Atomic units
+    * also keep an unclosed directive over a long escaped text, such as a stack trace, from backtracking exponentially.
+    * Named groups keep each branch bound to its own alternative when the pattern is edited.
+    */
+   private static final Pattern MARKDOWN_DIRECTIVES_PATTERN = Pattern.compile("" //
+         + "\\\\(?<escaped>[\\\\*`])" + '|' // escaped character
+         + "\\*\\*(?<bold>(?:(?>\\\\[\\\\*`]|.))*?)\\*\\*" + '|' // bold
+         + "```(?<block>(?:(?>\\\\[\\\\*`]|.))*?)```" + '|' // code block
+         + "`(?<code>(?:(?>\\\\[\\\\*`]|[^`]))*)`"); // inline code
+
    /**
     * Disposes a contributed renderer, logging instead of propagating its failure so that the caller can still release
     * the remaining renderers and its own resources. Linkage errors are included because a contribution's classes can
@@ -69,6 +83,10 @@ public final class MiscUtils {
     * <li><b>Inline code</b> — <code>`code`</code></li>
     * <li><b>Code block</b> — <code>```block```</code></li>
     * </ul>
+    * <p>
+    * A backslash before {@code \}, {@code *} or {@code `} shows that character literally, also inside a directive. Use
+    * {@link #escapeMarkdown} for embedded text that is not Markdown. A backslash before any other character is shown as is.
+    * </p>
     *
     * <p>
     * <b>Example:</b>
@@ -82,24 +100,25 @@ public final class MiscUtils {
     * @param markdown the input string containing Markdown-formatted text
     */
    public static void setMarkdown(final StyledText styledText, final String markdown) {
-      // Named groups keep each branch bound to its own alternative when the pattern is edited.
-      final var markdownDirectivesPattern = Pattern.compile("" //
-            + "\\*\\*(?<bold>.*?)\\*\\*" + '|' // bold
-            + "```(?<block>.*?)```" + '|' // code block
-            + "`(?<code>[^`]*)`"); // inline code
-
       final var plainText = new StringBuilder();
       final var styleRanges = new ArrayList<StyleRange>();
       int previousEndIndex = 0;
-      final Matcher markdownDirectivesMatcher = markdownDirectivesPattern.matcher(markdown);
+      final Matcher markdownDirectivesMatcher = MARKDOWN_DIRECTIVES_PATTERN.matcher(markdown);
       while (markdownDirectivesMatcher.find()) {
          plainText.append(markdown, previousEndIndex, markdownDirectivesMatcher.start());
+         previousEndIndex = markdownDirectivesMatcher.end();
+
+         final @Nullable String escaped = markdownDirectivesMatcher.group("escaped");
+         if (escaped != null) {
+            plainText.append(escaped);
+            continue;
+         }
 
          final var styleRange = new StyleRange();
          styleRange.start = plainText.length();
-         final @Nullable String bold = markdownDirectivesMatcher.group("bold");
-         final @Nullable String block = markdownDirectivesMatcher.group("block");
-         final @Nullable String code = markdownDirectivesMatcher.group("code");
+         final @Nullable String bold = unescapeMarkdown(markdownDirectivesMatcher.group("bold"));
+         final @Nullable String block = unescapeMarkdown(markdownDirectivesMatcher.group("block"));
+         final @Nullable String code = unescapeMarkdown(markdownDirectivesMatcher.group("code"));
          if (bold != null) {
             plainText.append(bold);
             styleRange.length = bold.length();
@@ -115,7 +134,6 @@ public final class MiscUtils {
             styleRange.font = JFaceResources.getTextFont();
          }
          styleRanges.add(styleRange);
-         previousEndIndex = markdownDirectivesMatcher.end();
       }
 
       plainText.append(markdown.substring(previousEndIndex));
@@ -123,6 +141,18 @@ public final class MiscUtils {
       for (final StyleRange styleRange : styleRanges) {
          styledText.setStyleRange(styleRange);
       }
+   }
+
+   /**
+    * Escapes text, such as an exception message or a file path, so that {@link #setMarkdown} shows it as is, also when it is
+    * embedded in a directive.
+    */
+   public static String escapeMarkdown(final String text) {
+      return MARKDOWN_SPECIAL_CHAR_PATTERN.matcher(text).replaceAll("\\\\$0");
+   }
+
+   private static @Nullable String unescapeMarkdown(final @Nullable String text) {
+      return text == null ? null : MARKDOWN_ESCAPE_PATTERN.matcher(text).replaceAll("$1");
    }
 
    public static @Nullable URI toURI(final @Nullable String url) {

@@ -64,6 +64,43 @@ class MiscUtilsTest {
    }
 
    @Test
+   void showsEscapedDirectiveCharactersLiterally() {
+      // Exception messages and file paths embedded in a message must not end or start a directive.
+      MiscUtils.setMarkdown(styledText, "**a\\*\\*b\\\\** \\`c\\` `d\\`e` \\x");
+
+      assertEquals("a**b\\ `c` d`e \\x", styledText.getText());
+      final var ranges = styledText.getStyleRanges();
+      assertEquals(2, ranges.length);
+      assertEquals(0, ranges[0].start);
+      assertEquals(5, ranges[0].length);
+      assertEquals(SWT.BOLD, ranges[0].fontStyle);
+      assertEquals(10, ranges[1].start);
+      assertEquals(3, ranges[1].length);
+      assertEquals(JFaceResources.getTextFont(), ranges[1].font);
+   }
+
+   @Test
+   void escapesTextSoItIsShownAsIs() {
+      final String untrusted = "C:\\a**b`c\\\\d ```e```";
+      MiscUtils.setMarkdown(styledText, "Failed: **" + MiscUtils.escapeMarkdown(untrusted) + "**");
+
+      assertEquals("Failed: " + untrusted, styledText.getText());
+      final var ranges = styledText.getStyleRanges();
+      assertEquals(1, ranges.length);
+      assertEquals(8, ranges[0].start);
+      assertEquals(untrusted.length(), ranges[0].length);
+      assertEquals(SWT.BOLD, ranges[0].fontStyle);
+   }
+
+   @Test
+   void keepsEscapedStackTraceTextInsideFences() {
+      final String stackTrace = "java.lang.IllegalStateException: bad `value` **here**\n\tat Foo.bar(Foo.java:1)";
+      MiscUtils.setMarkdown(styledText, "Reason:\n```" + MiscUtils.escapeMarkdown(stackTrace) + "```\n");
+
+      assertEquals("Reason:\n" + stackTrace + "\n", styledText.getText());
+   }
+
+   @Test
    void stylesBoldAndInlineCode() {
       MiscUtils.setMarkdown(styledText, "**bold** and `code`");
 

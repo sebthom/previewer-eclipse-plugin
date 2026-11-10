@@ -284,7 +284,8 @@ final class PreviewComposite extends Composite {
          // finish before a newer call can update the same controls. Superseded queued requests are skipped below.
          renderTask = renderTask.thenRunAsync(() -> render(source, forceCacheUpdate, selected, available, request)).exceptionally(ex -> {
             Plugin.log().error(ex);
-            updatePreview(request, () -> showInfo("Failed to prepare preview: **" + source.path() + "**\n\n" + ex.getMessage()));
+            updatePreview(request, () -> showInfo("Failed to prepare preview: **" + escapeMarkdown(source.path()) + "**\n\n"
+                  + escapeMarkdown(ex.getMessage())));
             return null;
          });
       });
@@ -299,7 +300,7 @@ final class PreviewComposite extends Composite {
       updatePreview(request, () -> setRendererChoices(matching, selected));
 
       final var candidates = selected == null ? matching : List.of(selected);
-      String failure = "No renderer found for: **" + source.path() + "**";
+      String failure = "No renderer found for: **" + escapeMarkdown(source.path()) + "**";
       for (final var rendererExt : candidates) {
          if (renderRequests.get() != request)
             return;
@@ -325,14 +326,14 @@ final class PreviewComposite extends Composite {
                return;
             }
             if (selected != null) {
-               failure = "**" + selected.name + "** cannot preview: **" + source.path() + "**";
+               failure = "**" + escapeMarkdown(selected.name) + "** cannot preview: **" + escapeMarkdown(source.path()) + "**";
             }
          } catch (final LinkageError | StackOverflowError | Exception ex) {
             Plugin.log().error(ex);
-            failure = "Failed to render: **" + source.path() + "**\n" //
-                  + "Renderer: **" + rendererExt.renderer.getClass().getName() + "**\n" //
+            failure = "Failed to render: **" + escapeMarkdown(source.path()) + "**\n" //
+                  + "Renderer: **" + escapeMarkdown(rendererExt.renderer.getClass().getName()) + "**\n" //
                   + "Time: **" + MiscUtils.getCurrentTime() + "**\n" //
-                  + "Reason:\n```" + Exceptions.getStackTrace(ex).replace("\t", "  ") + "```\n";
+                  + "Reason:\n```" + escapeMarkdown(Exceptions.getStackTrace(ex).replace("\t", "  ")) + "```\n";
          }
       }
 
@@ -422,6 +423,14 @@ final class PreviewComposite extends Composite {
             showInfo(markdown);
          }
       });
+   }
+
+   /**
+    * Escapes a message part that is not this composite's own Markdown, such as a file path or an exception message, so its
+    * characters are shown as they are. A {@code null} value is shown as {@code null}, like string concatenation does.
+    */
+   private static String escapeMarkdown(final @Nullable Object value) {
+      return MiscUtils.escapeMarkdown(String.valueOf(value));
    }
 
    private void showInfo(final String markdown) {
