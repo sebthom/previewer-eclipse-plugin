@@ -49,7 +49,7 @@
             <dependency>
                <groupId>net.sourceforge.plantuml</groupId>
                <artifactId>plantuml-mit</artifactId>
-               <version>1.2026.8</version>
+               <version>1.2026.10</version>
                <type>jar</type>
             </dependency>
             <dependency>
